@@ -5,13 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CatatanProduct extends Model
+class CatatanStock extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'quantity',
-        'total_price',
-        'product_id',
-    ];
 }
