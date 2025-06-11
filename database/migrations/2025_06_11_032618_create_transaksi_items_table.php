@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCatatanStocksTable extends Migration
+class CreateTransaksiItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,12 @@ class CreateCatatanStocksTable extends Migration
      */
     public function up()
     {
-        Schema::create('catatan_stocks', function (Blueprint $table) {
+        Schema::create('transaksi_items', function (Blueprint $table) {
             $table->id();
-            $table->string('jumlah');
-            $table->string('total_harga');
-            $table->string('bukti_nota');
-            $table->string('tanggal_belanja');
+            $table->integer('jumlah_product');
+            $table->integer('harga_jual_product');
             $table->foreignId('fk_id_product')->constrained('products')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('fk_id_transaksi')->constrained('transaksis')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ class CreateCatatanStocksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('catatan_stocks');
+        Schema::dropIfExists('transaksi_items');
     }
 }
