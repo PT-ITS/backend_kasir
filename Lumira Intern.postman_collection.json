@@ -1,0 +1,400 @@
+{
+	"info": {
+		"_postman_id": "39d842b4-55a7-41e8-8441-58b2f7f7853b",
+		"name": "Lumira Intern",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24334708"
+	},
+	"item": [
+		{
+			"name": "portfolio",
+			"item": [
+				{
+					"name": "getAllData",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/portfolio",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"portfolio"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postData",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "judul",
+									"value": "test",
+									"type": "text"
+								},
+								{
+									"key": "deskripsi",
+									"value": "test",
+									"type": "text"
+								},
+								{
+									"key": "images",
+									"type": "file",
+									"src": "/C:/Users/Student/Pictures/Jadwal.PNG"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/portfolio",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"portfolio"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDataByID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/portfolio/643e598c3a074e72be032912",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"portfolio",
+								"643e598c3a074e72be032912"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateData",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"judul\":\"Web Apps\",\r\n    \"deskripsi\" : \"Kami Sangat Profesional\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/portfolio/643e598c3a074e72be032912",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"portfolio",
+								"643e598c3a074e72be032912"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteData",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/portfolio/643e598c3a074e72be032912",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"portfolio",
+								"643e598c3a074e72be032912"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "clients",
+			"item": [
+				{
+					"name": "getAllData",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/client",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"client"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postData",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "images",
+									"type": "file",
+									"src": "/C:/Users/LENOVO/Pictures/walisongo/bus.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/client",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"client"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDataByID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/client/6447daa33da123d010091f22",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"client",
+								"6447daa33da123d010091f22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateData",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"judul\":\"Web Apps\",\r\n    \"deskripsi\" : \"Kami Sangat Profesional\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/portfolio/643e598c3a074e72be032912",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"portfolio",
+								"643e598c3a074e72be032912"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteData",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/client/6447daa33da123d010091f22",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"client",
+								"6447daa33da123d010091f22"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "testimoni",
+			"item": [
+				{
+					"name": "getAllData",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/testimoni",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"testimoni"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postData",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nama\" : \"Bagus Untoro\",\r\n    \"profesi\" : \"Dosen and IT manager in Bank Indonesia\",\r\n    \"text\" : \"aamiin ya ALlah\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/testimoni",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"testimoni"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDataByID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/testimoni/6447e14829c4bc9469051a12",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"testimoni",
+								"6447e14829c4bc9469051a12"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateData",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nama\" : \"Bagus Untoro\",\r\n    \"profesi\" : \"Dosen and IT manager in Bank Indonesia\",\r\n    \"text\" : \"aamiin ya ALlah\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/testimoni/6447e14829c4bc9469051a12",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"testimoni",
+								"6447e14829c4bc9469051a12"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteData",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/testimoni/6447e14829c4bc9469051a12",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"testimoni",
+								"6447e14829c4bc9469051a12"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
