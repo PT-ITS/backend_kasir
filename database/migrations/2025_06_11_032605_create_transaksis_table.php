@@ -22,6 +22,7 @@ class CreateTransaksisTable extends Migration
                 '1' // transaksi konsumsi kasir
             ]);
             $table->foreignId('fk_id_kasir')->constrained('kasirs')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('fk_id_toko')->constrained('tokos')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
