@@ -15,11 +15,10 @@ class CreateCatatanStocksTable extends Migration
     {
         Schema::create('catatan_stocks', function (Blueprint $table) {
             $table->id();
-            $table->string('jumlah');
             $table->string('total_harga');
             $table->string('bukti_nota');
             $table->string('tanggal_belanja');
-            $table->foreignId('fk_id_product')->constrained('products')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('fk_id_toko')->constrained('tokos')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TransaksiController;
 
 Route::group([
   'prefix' => 'auth'
@@ -56,4 +57,16 @@ Route::group([
     Route::post('update/{id}', [ManagerController::class, 'update']);
     Route::delete('delete/{id}', [ManagerController::class, 'delete']);
   });
+});
+
+Route::group([
+  'prefix' => 'transaksi'
+], function () {
+  // Route::group([
+  //     'middleware' => ['auth:api', 'signature']
+  // ], function () {
+  Route::get('/list', [TransaksiController::class, 'listTransaksiByToko']);
+  Route::get('/detail/{id}', [TransaksiController::class, 'detailTransaksi']);
+  Route::post('/create', [TransaksiController::class, 'createTransaksi']);
+  // });
 });

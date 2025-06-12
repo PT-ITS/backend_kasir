@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
-use App\Models\CatatanProduct;
+use App\Models\CatatanStock;
+use App\Models\Transaksi;
+use App\Models\TransaksiItem;
 
 class ProductController extends Controller
 {
-    public function listProduct()
+    public function listProductByToko($id)
     {
-        $products = Product::all();
+        $products = Product::where('fk_id_toko', $id)->get();
         return response()->json([
             'id' => '1',
             'data' => $products
@@ -32,91 +34,29 @@ class ProductController extends Controller
         ]);
     }
 
-    public function createProduct(Request $request)
+    public function updateHargaProduct(Request $request)
     {
         $validateData = $request->validate([
-            'name_product' => 'required',
-            'quantity' => 'required',
-            'buy_price' => 'required',
-            'sell_price' => 'required',
-        ]);
-        $products = Product::create([
-            'name_product' => $validateData['name_product'],
-            'quantity' => $validateData['quantity'],
-            'buy_price' => $validateData['buy_price'],
-            'sell_price' => $validateData['sell_price'],
+            'id_product' => 'required',
+            'harga_jual' => 'required',
         ]);
 
-        CatatanProduct::create([
-            'product_id' => $products->id,
-            'quantity' => $validateData['quantity'],
-            'total_price' => $validateData['buy_price'] * $validateData['quantity'],
-            'status' => '0'
-        ]);
+        $products = Product::find($validateData['id_product']);
 
-        return response()->json([
-            'id' => '1',
-            'message' => 'success',
-            'data' => $products
-        ]);
-    }
-
-    public function sellProduct(Request $request, $id)
-    {
-        $validateData = $request->validate([
-            'quantity' => 'required',
-            'sell_price' => 'required',
-        ]);
-        $products = Product::find($id);
         if (!$products) {
             return response()->json([
                 'id' => '0',
                 'message' => 'data not found'
             ]);
         }
-        $products->quantity = $products->quantity - $validateData['quantity'];
-        // $products->sell_price = $validateData['sell_price'];
-        $products->save();
 
-        CatatanProduct::create([
-            'product_id' => $id,
-            'quantity' => $validateData['quantity'],
-            'total_price' => $validateData['sell_price'] * $validateData['quantity'],
-            'status' => '1'
-        ]);
+        $products->harga_jual = $validateData['harga_jual'];
+        $products->save();
 
         return response()->json([
             'id' => '1',
-            'data' => $products
+            'data' => 'harga product berhasil di update'
         ]);
     }
-    public function buyProduct(Request $request, $id)
-    {
-        $validateData = $request->validate([
-            'quantity' => 'required',
-            'buy_price' => 'required',
-        ]);
-        $products = Product::find($id);
-        if (!$products) {
-            return response()->json([
-                'id' => '0',
-                'message' => 'data not found'
-            ]);
-        }
-        $products->quantity = $products->quantity + $validateData['quantity'];
-        // $products->buy_price = $validateData['buy_price'];
-        $products->save();
 
-        CatatanProduct::create([
-            'product_id' => $id,
-            'quantity' => $validateData['quantity'],
-            'total_price' => $validateData['buy_price'] * $validateData['quantity'],
-            'status' => '0'
-        ]);
-
-        return response()->json([
-            'id' => '1',
-            'data' => $products
-        ]);
-    }
 }
