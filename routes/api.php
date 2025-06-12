@@ -3,8 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BiayaOperasionalController;
+use App\Http\Controllers\KasirController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TokoController;
 use App\Http\Controllers\TransaksiController;
 
 Route::group([
@@ -60,10 +63,52 @@ Route::group([
 });
 
 Route::group([
+  'prefix' => 'toko'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('list', [TokoController::class, 'list']);
+    Route::get('detail/{id}', [TokoController::class, 'detail']);
+    Route::post('create', [TokoController::class, 'create']);
+    Route::post('update/{id}', [TokoController::class, 'update']);
+    Route::delete('delete/{id}', [TokoController::class, 'delete']);
+  });
+});
+
+Route::group([
+  'prefix' => 'kasir'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('list', [KasirController::class, 'list']);
+    Route::get('detail/{id}', [KasirController::class, 'detail']);
+    Route::post('create', [KasirController::class, 'create']);
+    Route::post('update/{id}', [KasirController::class, 'update']);
+    Route::delete('delete/{id}', [KasirController::class, 'delete']);
+  });
+});
+
+Route::group([
+  'prefix' => 'biaya-operasional'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('list', [BiayaOperasionalController::class, 'list']);
+    Route::get('detail/{id}', [BiayaOperasionalController::class, 'detail']);
+    Route::post('create', [BiayaOperasionalController::class, 'create']);
+    Route::post('update/{id}', [BiayaOperasionalController::class, 'update']);
+    Route::delete('delete/{id}', [BiayaOperasionalController::class, 'delete']);
+  });
+});
+
+Route::group([
   'prefix' => 'transaksi'
 ], function () {
   // Route::group([
-  //     'middleware' => ['auth:api', 'signature']
+  //     'middleware' => 'auth:api'
   // ], function () {
   Route::get('/list', [TransaksiController::class, 'listTransaksiByToko']);
   Route::get('/detail/{id}', [TransaksiController::class, 'detailTransaksi']);
