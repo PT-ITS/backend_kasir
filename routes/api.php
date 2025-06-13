@@ -69,6 +69,7 @@ Route::group([
     'middleware' => 'auth:api'
   ], function () {
     Route::get('list', [TokoController::class, 'list']);
+    Route::get('list-by-manager/{id}', [TokoController::class, 'listByManager']);
     Route::get('detail/{id}', [TokoController::class, 'detail']);
     Route::post('create', [TokoController::class, 'create']);
     Route::post('update/{id}', [TokoController::class, 'update']);
@@ -83,6 +84,7 @@ Route::group([
     'middleware' => 'auth:api'
   ], function () {
     Route::get('list', [KasirController::class, 'list']);
+    Route::get('list-by-toko/{id}', [KasirController::class, 'listByToko']);
     Route::get('detail/{id}', [KasirController::class, 'detail']);
     Route::post('create', [KasirController::class, 'create']);
     Route::post('update/{id}', [KasirController::class, 'update']);

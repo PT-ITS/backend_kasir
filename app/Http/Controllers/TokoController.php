@@ -32,6 +32,31 @@ class TokoController extends Controller
         }
     }
 
+    public function listByManager($id)
+    {
+        try {
+            $datas = Toko::where('fk_id_manager', $id)->get();
+            if (!$datas) {
+                return response()->json([
+                    'id' => '0',
+                    'message' => 'data not found',
+                    'data' => []
+                ]);
+            }
+            return response()->json([
+                'id' => '1',
+                'message' => 'data found',
+                'data' => $datas
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'message' => $th->getMessage(),
+                'data' => []
+            ]);
+        }
+    }
+
     public function detail($id)
     {
         try {

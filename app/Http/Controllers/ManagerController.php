@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Manager;
+use Illuminate\Support\Facades\DB;
 
 class ManagerController extends Controller
 {
@@ -73,24 +74,36 @@ class ManagerController extends Controller
                 'hp_manager' => 'required',
                 'alamat_manager' => 'required',
             ]);
-            $datas = User::create([
-                'name' => $validateData['name'],
-                'email' => $validateData['email'],
-                'password' => bcrypt($validateData['password']),
-            ]);
 
-            Manager::create([
-                'nama_manager' => $validateData['nama_manager'],
-                'hp_manager' => $validateData['hp_manager'],
-                'alamat_manager' => $validateData['alamat_manager'],
-                'fk_id_user' => $datas->id,
-            ]);
+            DB::beginTransaction();
+            try {
+                $datas = User::create([
+                    'name' => $validateData['name'],
+                    'email' => $validateData['email'],
+                    'password' => bcrypt($validateData['password']),
+                ]);
 
-            return response()->json([
-                'id' => '1',
-                'message' => 'success',
-                'data' => $datas
-            ]);
+                Manager::create([
+                    'nama_manager' => $validateData['nama_manager'],
+                    'hp_manager' => $validateData['hp_manager'],
+                    'alamat_manager' => $validateData['alamat_manager'],
+                    'fk_id_user' => $datas->id,
+                ]);
+
+                DB::commit();
+                return response()->json([
+                    'id' => '1',
+                    'message' => 'success',
+                    'data' => $datas
+                ]);
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return response()->json([
+                    'id' => '0',
+                    'message' => $th->getMessage(),
+                    'data' => []
+                ]);
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'id' => '0',
@@ -119,23 +132,35 @@ class ManagerController extends Controller
                     'data' => []
                 ]);
             }
-            $datas->name = $validateData['name'];
-            $datas->email = $validateData['email'];
-            $datas->password = bcrypt($validateData['password']);
-            $datas->save();
 
-            $idManager = Manager::where('fk_id_user', $id)->first();
-            $dataManager = Manager::find($idManager->id);
-            $dataManager->nama_manager = $validateData['nama_manager'];
-            $dataManager->hp_manager = $validateData['hp_manager'];
-            $dataManager->alamat_manager = $validateData['alamat_manager'];
-            $dataManager->save();
+            DB::beginTransaction();
+            try {
+                $datas->name = $validateData['name'];
+                $datas->email = $validateData['email'];
+                $datas->password = bcrypt($validateData['password']);
+                $datas->save();
 
-            return response()->json([
-                'id' => '1',
-                'message' => 'success',
-                'data' => $datas
-            ]);
+                $idManager = Manager::where('fk_id_user', $id)->first();
+                $dataManager = Manager::find($idManager->id);
+                $dataManager->nama_manager = $validateData['nama_manager'];
+                $dataManager->hp_manager = $validateData['hp_manager'];
+                $dataManager->alamat_manager = $validateData['alamat_manager'];
+                $dataManager->save();
+
+                DB::commit();
+                return response()->json([
+                    'id' => '1',
+                    'message' => 'success',
+                    'data' => $datas
+                ]);
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return response()->json([
+                    'id' => '0',
+                    'message' => $th->getMessage(),
+                    'data' => []
+                ]);
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'id' => '0',
