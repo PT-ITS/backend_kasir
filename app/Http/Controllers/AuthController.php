@@ -238,7 +238,7 @@ class AuthController extends Controller
             'email' => auth()->user()->email,
             'level' => auth()->user()->level,
             'status' => auth()->user()->status,
-            'id_toko' => $idToko,
+            'id_toko' => $idToko ?? '',
             'iat' => now()->timestamp,
             'token_type' => 'bearer',
             'expires_in' =>  auth()->factory()->getTTL() * 60,
