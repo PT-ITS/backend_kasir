@@ -37,15 +37,15 @@ Route::group([
 Route::group([
   'prefix' => 'product'
 ], function () {
-  // Route::group([
-  //     'middleware' => 'auth:api'
-  // ], function () {
-  Route::get('/list', [ProductController::class, 'listProduct']);
-  Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
-  Route::post('/create', [ProductController::class, 'createProduct']);
-  Route::post('/buy/{id}', [ProductController::class, 'buyProduct']);
-  Route::post('/sell/{id}', [ProductController::class, 'sellProduct']);
-  // });
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('/list', [ProductController::class, 'listProduct']);
+    Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
+    Route::post('/create', [ProductController::class, 'createProduct']);
+    Route::post('/buy/{id}', [ProductController::class, 'buyProduct']);
+    Route::post('/sell/{id}', [ProductController::class, 'sellProduct']);
+  });
 });
 
 Route::group([
@@ -69,6 +69,9 @@ Route::group([
     'middleware' => 'auth:api'
   ], function () {
     Route::get('list', [TokoController::class, 'list']);
+    Route::get('keuntungan', [TokoController::class, 'keuntungan']);
+    Route::get('jumlah-produk', [TokoController::class, 'jumlahProduk']);
+    Route::get('jumlah-terjual', [TokoController::class, 'jumlahTerjual']);
     Route::get('detail/{id}', [TokoController::class, 'detail']);
     Route::post('create', [TokoController::class, 'create']);
     Route::post('update/{id}', [TokoController::class, 'update']);
