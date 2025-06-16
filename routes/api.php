@@ -40,7 +40,7 @@ Route::group([
   Route::group([
     'middleware' => 'auth:api'
   ], function () {
-    Route::get('/list', [ProductController::class, 'listProduct']);
+    Route::get('/list/{id}', [ProductController::class, 'listProductByToko']);
     Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
     Route::post('/create', [ProductController::class, 'createProduct']);
     Route::post('/buy/{id}', [ProductController::class, 'buyProduct']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Toko;
 use App\Models\CatatanStock;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
@@ -12,6 +13,7 @@ class ProductController extends Controller
 {
     public function listProductByToko($id)
     {
+        $idToko = Toko::where('id', $id)->first();
         $products = Product::where('fk_id_toko', $id)->get();
         return response()->json([
             'id' => '1',
