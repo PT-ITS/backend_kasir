@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\Kasir;
 use DateTimeZone;
 use DateTime;
 use App\Mail\EmailVerification;
@@ -229,6 +230,7 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
+        $idToko = Kasir::where('fk_id_user', auth()->user()->id)->first()->fk_id_toko;
         return response()->json([
             'access_token' => $token,
             'sub' => auth()->user()->id,
@@ -236,6 +238,7 @@ class AuthController extends Controller
             'email' => auth()->user()->email,
             'level' => auth()->user()->level,
             'status' => auth()->user()->status,
+            'id_toko' => $idToko,
             'iat' => now()->timestamp,
             'token_type' => 'bearer',
             'expires_in' =>  auth()->factory()->getTTL() * 60,

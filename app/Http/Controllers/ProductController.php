@@ -4,21 +4,52 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
-use App\Models\Toko;
+use App\Models\Kasir;
 use App\Models\CatatanStock;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
 
 class ProductController extends Controller
 {
-    public function listProductByToko($id)
+    public function listProductByToko()
     {
-        $idToko = Toko::where('id', $id)->first();
-        $products = Product::where('fk_id_toko', $id)->get();
+        $idToko = Kasir::where('fk_id_user', auth()->user()->id)->first();
+        $products = Product::where('fk_id_toko', $idToko->fk_id_toko)->get();
         return response()->json([
             'id' => '1',
             'data' => $products
         ]);
+    }
+
+    public function createNewProduct(Request $request)
+    {
+        try {
+            $validateData = $request->validate([
+                'nama_product' => 'required',
+                'stock_product' => 'required',
+                'harga_jual' => 'required',
+                'barcode' => 'required',
+                'fk_id_toko' => 'required|exists:tokos,id'
+            ]);
+
+            $products = Product::create([
+                'nama_product' => $validateData['nama_product'],
+                'stock_product' => $validateData['stock_product'],
+                'harga_jual' => $validateData['harga_jual'],
+                'barcode' => $validateData['barcode'],
+                'fk_id_toko' => $validateData['fk_id_toko']
+            ]);
+
+            return response()->json([
+                'id' => '1',
+                'data' => 'product berhasil di tambahkan'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'data' => 'product gagal di tambahkan'
+            ]);
+        }
     }
 
     public function detailProduct($id)

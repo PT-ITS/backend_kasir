@@ -7,6 +7,7 @@ use App\Http\Controllers\BiayaOperasionalController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\TokoController;
 use App\Http\Controllers\TransaksiController;
 
@@ -37,15 +38,14 @@ Route::group([
 Route::group([
   'prefix' => 'product'
 ], function () {
-  Route::group([
-    'middleware' => 'auth:api'
-  ], function () {
-    Route::get('/list/{id}', [ProductController::class, 'listProductByToko']);
+  // Route::group([
+  //   'middleware' => 'auth:api'
+  // ], function () {
+    Route::get('/list', [ProductController::class, 'listProductByToko']);
     Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
-    Route::post('/create', [ProductController::class, 'createProduct']);
-    Route::post('/buy/{id}', [ProductController::class, 'buyProduct']);
-    Route::post('/sell/{id}', [ProductController::class, 'sellProduct']);
-  });
+    Route::post('/create', [ProductController::class, 'createNewProduct']);
+    Route::post('/import', [ProductImportController::class, 'import']);
+  // });
 });
 
 Route::group([
@@ -72,6 +72,7 @@ Route::group([
     Route::get('keuntungan', [TokoController::class, 'keuntungan']);
     Route::get('jumlah-produk', [TokoController::class, 'jumlahProduk']);
     Route::get('jumlah-terjual', [TokoController::class, 'jumlahTerjual']);
+    Route::get('list-by-manager/{id}', [TokoController::class, 'listByManager']);
     Route::get('detail/{id}', [TokoController::class, 'detail']);
     Route::post('create', [TokoController::class, 'create']);
     Route::post('update/{id}', [TokoController::class, 'update']);
@@ -86,6 +87,7 @@ Route::group([
     'middleware' => 'auth:api'
   ], function () {
     Route::get('list', [KasirController::class, 'list']);
+    Route::get('list-by-toko/{id}', [KasirController::class, 'listByToko']);
     Route::get('detail/{id}', [KasirController::class, 'detail']);
     Route::post('create', [KasirController::class, 'create']);
     Route::post('update/{id}', [KasirController::class, 'update']);
