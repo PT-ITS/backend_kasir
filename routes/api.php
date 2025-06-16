@@ -7,6 +7,7 @@ use App\Http\Controllers\BiayaOperasionalController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\TokoController;
 use App\Http\Controllers\TransaksiController;
 
@@ -37,15 +38,14 @@ Route::group([
 Route::group([
   'prefix' => 'product'
 ], function () {
-  Route::group([
-    'middleware' => 'auth:api'
-  ], function () {
-    Route::get('/list-by-toko/{id}', [ProductController::class, 'listProductByToko']);
-    Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
-    Route::post('/create', [ProductController::class, 'createProduct']);
-    Route::post('/buy/{id}', [ProductController::class, 'buyProduct']);
-    Route::post('/sell/{id}', [ProductController::class, 'sellProduct']);
-  });
+  // Route::group([
+  //   'middleware' => 'auth:api'
+  // ], function () {
+  Route::get('/list', [ProductController::class, 'listProductByToko']);
+  Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
+  Route::post('/create', [ProductController::class, 'createNewProduct']);
+  Route::post('/import', [ProductImportController::class, 'import']);
+  // });
 });
 
 Route::group([

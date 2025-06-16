@@ -321,7 +321,6 @@ class TokoController extends Controller
         return response()->json($results);
     }
 
-
     public function detail($id)
     {
         try {
