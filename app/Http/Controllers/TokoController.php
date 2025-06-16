@@ -74,6 +74,7 @@ class TokoController extends Controller
             $jumlahProduk = Product::where('fk_id_toko', $toko->id)->count();
 
             $results[] = [
+                'id' => $toko->id,
                 'nama_toko' => $toko->nama_toko,
                 'jumlah_produk' => $jumlahProduk
             ];

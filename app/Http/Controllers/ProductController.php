@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Kasir;
 use App\Models\CatatanStock;
+use App\Models\Toko;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
 
@@ -15,6 +16,15 @@ class ProductController extends Controller
     {
         $idToko = Kasir::where('fk_id_user', auth()->user()->id)->first();
         $products = Product::where('fk_id_toko', $idToko->fk_id_toko)->get();
+        return response()->json([
+            'id' => '1',
+            'data' => $products
+        ]);
+    }
+
+    public function listProductByIdToko($id)
+    {
+        $products = Product::where('fk_id_toko', $id)->get();
         return response()->json([
             'id' => '1',
             'data' => $products
@@ -47,7 +57,7 @@ class ProductController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'id' => '0',
-                'data' => 'product gagal di tambahkan'
+                'data' => $th->getMessage()
             ]);
         }
     }
@@ -91,5 +101,4 @@ class ProductController extends Controller
             'data' => 'harga product berhasil di update'
         ]);
     }
-
 }
