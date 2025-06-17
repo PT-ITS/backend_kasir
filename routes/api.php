@@ -70,10 +70,11 @@ Route::group([
     'middleware' => 'auth:api'
   ], function () {
     Route::get('list', [TokoController::class, 'list']);
+    Route::get('list-by-manager/{id}', [TokoController::class, 'listByManager']);
     Route::get('keuntungan', [TokoController::class, 'keuntungan']);
     Route::get('jumlah-produk', [TokoController::class, 'jumlahProduk']);
-    Route::get('jumlah-terjual', [TokoController::class, 'jumlahTerjual']);
-    Route::get('list-by-manager/{id}', [TokoController::class, 'listByManager']);
+    Route::get('transaksi-per-toko', [TokoController::class, 'transaksiPerToko']);
+    Route::get('transaksi-by-toko/{id}', [TokoController::class, 'transaksiByToko']);
     Route::get('detail/{id}', [TokoController::class, 'detail']);
     Route::post('create', [TokoController::class, 'create']);
     Route::post('update/{id}', [TokoController::class, 'update']);

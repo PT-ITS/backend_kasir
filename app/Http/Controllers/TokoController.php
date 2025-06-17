@@ -40,6 +40,31 @@ class TokoController extends Controller
         }
     }
 
+    public function listByManager($id)
+    {
+        try {
+            $datas = Toko::where('fk_id_manager', $id)->get();
+            if (!$datas) {
+                return response()->json([
+                    'id' => '0',
+                    'message' => 'data not found',
+                    'data' => []
+                ]);
+            }
+            return response()->json([
+                'id' => '1',
+                'message' => 'data found',
+                'data' => $datas
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'message' => $th->getMessage(),
+                'data' => []
+            ]);
+        }
+    }
+
     public function jumlahProduk()
     {
         $tokos = Toko::all();
@@ -49,6 +74,7 @@ class TokoController extends Controller
             $jumlahProduk = Product::where('fk_id_toko', $toko->id)->count();
 
             $results[] = [
+                'id' => $toko->id,
                 'nama_toko' => $toko->nama_toko,
                 'jumlah_produk' => $jumlahProduk
             ];
@@ -56,11 +82,11 @@ class TokoController extends Controller
 
         return response()->json($results);
     }
-    
-    public function jumlahTerjual()
+
+    public function transaksiPerToko()
     {
         $today = Carbon::today();
-        $startOfWeek = Carbon::now()->startOfWeek();
+        $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
         $startOfMonth = Carbon::now()->startOfMonth();
         $startOfYear = Carbon::now()->startOfYear();
 
@@ -93,7 +119,7 @@ class TokoController extends Controller
                 ->whereDate('created_at', '>=', $startOfYear)
                 ->sum('jumlah_product');
 
-            // Hitung keuntungan hari ini
+            // Keuntungan hari ini
             $keuntunganHariIni = 0;
 
             foreach ($transaksiHariIni as $trx) {
@@ -110,7 +136,32 @@ class TokoController extends Controller
                 ->whereDate('tanggal_belanja', $today)
                 ->sum('total_harga');
 
+            // === Pendapatan per hari dari Senin - Minggu ===
+            $pendapatanHarian = [];
+
+            for ($i = 0; $i < 7; $i++) {
+                $day = Carbon::now()->startOfWeek(Carbon::MONDAY)->addDays($i);
+                $transaksiHarian = Transaksi::with('items')
+                    ->where('fk_id_toko', $toko->id)
+                    ->whereDate('created_at', $day)
+                    ->get();
+
+                $pendapatanHari = 0;
+
+                foreach ($transaksiHarian as $trx) {
+                    foreach ($trx->items as $item) {
+                        $productId = $item->fk_id_product;
+                        $avgHargaBeli = TambahStock::where('fk_id_product', $productId)->avg('harga_beli') ?? 0;
+                        $keuntunganPerItem = ($item->harga_jual_product - $avgHargaBeli) * $item->jumlah_product;
+                        $pendapatanHari += $keuntunganPerItem;
+                    }
+                }
+
+                $pendapatanHarian[] = round($pendapatanHari);
+            }
+
             $results[] = [
+                'id_toko' => $toko->id,
                 'nama_toko' => $toko->nama_toko,
                 'jumlah_terjual_hari_ini' => $hariIni,
                 'jumlah_terjual_minggu_ini' => $mingguIni,
@@ -118,12 +169,95 @@ class TokoController extends Controller
                 'jumlah_terjual_tahun_ini' => $tahunIni,
                 'keuntungan_hari_ini' => round($keuntunganHariIni),
                 'total_belanja_hari_ini' => (int) $totalBelanjaHariIni,
+                'pendapatan_harian' => $pendapatanHarian, // <-- array 7 elemen
             ];
         }
 
-        return response()->json($results);
+        return response()->json([
+            'id' => '1',
+            'message' => 'data found',
+            'data' => $results
+        ]);
     }
 
+    public function transaksiByToko($id)
+    {
+        $today = Carbon::today();
+
+        $toko = Toko::findOrFail($id);
+
+        // Get today's transactions for this toko
+        $transaksiHariIni = Transaksi::with(['items' => function ($query) {
+            $query->with('product'); // include product info in items
+        }])
+            ->where('fk_id_toko', $toko->id)
+            ->whereDate('created_at', $today)
+            ->get();
+
+        $transaksiIds = $transaksiHariIni->pluck('id');
+
+        // Total item quantity sold today
+        $jumlahProdukTerjual = TransaksiItem::whereIn('fk_id_transaksi', $transaksiIds)
+            ->whereDate('created_at', $today)
+            ->sum('jumlah_product');
+
+        // Total pendapatan (total_bayar)
+        $totalPendapatan = $transaksiHariIni->sum('total_bayar');
+
+        // Count how many transactions today
+        $jumlahTransaksiHariIni = $transaksiHariIni->count();
+
+        // Keuntungan hari ini
+        $keuntunganHariIni = 0;
+
+        foreach ($transaksiHariIni as $trx) {
+            foreach ($trx->items as $item) {
+                $productId = $item->fk_id_product;
+                $avgHargaBeli = TambahStock::where('fk_id_product', $productId)->avg('harga_beli') ?? 0;
+                $keuntunganPerItem = ($item->harga_jual_product - $avgHargaBeli) * $item->jumlah_product;
+                $keuntunganHariIni += $keuntunganPerItem;
+            }
+        }
+
+        // Format list_transaksi with jumlah item per transaksi
+        $formattedTransaksi = $transaksiHariIni->map(function ($trx) {
+            $totalItem = $trx->items->sum('jumlah_product');
+            return [
+                'id' => $trx->id,
+                'total_bayar' => $trx->total_bayar,
+                'total_modal' => $trx->total_modal,
+                'jenis_transaksi' => $trx->jenis_transaksi,
+                'created_at' => $trx->created_at,
+                'jumlah_item' => $totalItem,
+            ];
+        });
+
+        // Get item list with product names
+        $itemsHariIni = TransaksiItem::with('product')
+            ->whereIn('fk_id_transaksi', $transaksiIds)
+            ->whereDate('created_at', $today)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'jumlah_product' => $item->jumlah_product,
+                    'harga_jual_product' => $item->harga_jual_product,
+                    'nama_product' => optional($item->product)->nama_product,
+                    'created_at' => $item->created_at,
+                ];
+            });
+
+        return response()->json([
+            'id_toko' => $toko->id,
+            'nama_toko' => $toko->nama_toko,
+            'jumlah_terjual_hari_ini' => $jumlahProdukTerjual,
+            'jumlah_transaksi_hari_ini' => $jumlahTransaksiHariIni,
+            'keuntungan_hari_ini' => round($keuntunganHariIni),
+            'pendapatan_hari_ini' => $totalPendapatan,
+            'list_transaksi_hari_ini' => $formattedTransaksi,
+            'list_item_terjual_hari_ini' => $itemsHariIni,
+        ]);
+    }
 
     public function keuntungan()
     {
@@ -186,32 +320,6 @@ class TokoController extends Controller
         }
 
         return response()->json($results);
-    }
-
-
-    public function listByManager($id)
-    {
-        try {
-            $datas = Toko::where('fk_id_manager', $id)->get();
-            if (!$datas) {
-                return response()->json([
-                    'id' => '0',
-                    'message' => 'data not found',
-                    'data' => []
-                ]);
-            }
-            return response()->json([
-                'id' => '1',
-                'message' => 'data found',
-                'data' => $datas
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'id' => '0',
-                'message' => $th->getMessage(),
-                'data' => []
-            ]);
-        }
     }
 
     public function detail($id)

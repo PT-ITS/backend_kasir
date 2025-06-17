@@ -15,4 +15,9 @@ class TransaksiItem extends Model
         'fk_id_product',
         'fk_id_transaksi'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'fk_id_product');
+    }
 }

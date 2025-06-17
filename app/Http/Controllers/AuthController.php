@@ -35,10 +35,11 @@ class AuthController extends Controller
         $dataUser->password = bcrypt($validateData['password']);
         $dataUser->save();
 
-        return response()->json(['message' => 'success'],200);
+        return response()->json(['message' => 'success'], 200);
     }
 
-    public function register(Request $request){
+    public function register(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|email|unique:users',
@@ -58,7 +59,7 @@ class AuthController extends Controller
         ]);
 
         if ($user) {
-            return response()->json(['message' => 'Registration successful'],201);
+            return response()->json(['message' => 'Registration successful'], 201);
         } else {
             return response()->json(['message' => 'Registration failed'], 500);
         }
@@ -73,7 +74,7 @@ class AuthController extends Controller
     {
         $user = User::find($id);
         if ($user) {
-            return response()->json($user->active_token,200);
+            return response()->json($user->active_token, 200);
         }
     }
 
@@ -81,7 +82,7 @@ class AuthController extends Controller
     {
         // $now = Carbon::now(); 
         $user = User::where('email', request('email'))->first();
-        
+
         $credentials = request(['email', 'password']);
 
         if (! $token = JWTAuth::attempt($credentials)) {
@@ -97,7 +98,7 @@ class AuthController extends Controller
             'status' => $user->status,
         ];
 
-        
+
         $tokenWithClaims = JWTAuth::claims($customClaims)->fromUser($user);
         $user->active_token = $tokenWithClaims;
         $user->save();
@@ -214,11 +215,11 @@ class AuthController extends Controller
             $data->save();
             return response()->json([
                 'message' => 'success'
-            ],200);    
+            ], 200);
         }
         return response()->json([
             'message' => 'failed'
-        ],401);
+        ], 401);
     }
 
     /**
@@ -244,7 +245,4 @@ class AuthController extends Controller
             'expires_in' =>  auth()->factory()->getTTL() * 60,
         ]);
     }
-    
-    
-
 }

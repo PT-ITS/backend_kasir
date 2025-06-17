@@ -2,14 +2,21 @@
 
 namespace Database\Seeders;
 
+use App\Models\CatatanStock;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Langganan;
 use App\Models\Invoice;
 use App\Models\Kasir;
 use App\Models\Manager;
+use App\Models\Product;
+use App\Models\TambahStock;
 use App\Models\Toko;
+use App\Models\Transaksi;
+use App\Models\TransaksiItem;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DataSeeder extends Seeder
 {
