@@ -42,6 +42,7 @@ Route::group([
     'middleware' => 'auth:api'
   ], function () {
     Route::get('/list', [ProductController::class, 'listProductByToko']);
+    Route::get('/list/{id}', [ProductController::class, 'listProductByIdToko']);
     Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
     Route::post('/create', [ProductController::class, 'createNewProduct']);
     Route::get('/search', [ProductController::class, 'search']);

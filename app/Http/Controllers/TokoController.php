@@ -83,6 +83,42 @@ class TokoController extends Controller
         return response()->json($results);
     }
 
+    // public function jumlahProduk()
+    // {
+    //     $tokos = Toko::all();
+    //     $results = [];
+    //     $today = Carbon::today();
+
+    //     foreach ($tokos as $toko) {
+    //         // Semua produk toko
+    //         $produkToko = Product::where('fk_id_toko', $toko->id)->get();
+
+    //         // Jumlah produk total
+    //         $jumlahProduk = $produkToko->count();
+
+    //         // Jumlah produk dengan stok == 0
+    //         $produkStokHabis = $produkToko->where('stock_product', 0)->count();
+
+    //         // Ambil semua ID produk toko ini
+    //         $productIds = $produkToko->pluck('id');
+
+    //         // Hitung produk yang punya stok expired
+    //         $expiredProductCount = TambahStock::whereIn('fk_id_product', $productIds)
+    //             ->whereDate('expired', '<', $today)
+    //             ->count();
+
+    //         $results[] = [
+    //             'id' => $toko->id,
+    //             'nama_toko' => $toko->nama_toko,
+    //             'jumlah_produk' => $jumlahProduk,
+    //             'jumlah_produk_stok_0' => $produkStokHabis,
+    //             'jumlah_produk_expired' => $expiredProductCount,
+    //         ];
+    //     }
+
+    //     return response()->json($results);
+    // }
+
     public function transaksiPerToko()
     {
         $today = Carbon::today();

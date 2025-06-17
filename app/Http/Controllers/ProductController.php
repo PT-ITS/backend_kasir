@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Kasir;
 use App\Models\CatatanStock;
+use App\Models\TambahStock;
 use App\Models\Toko;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
+use Carbon\Carbon;
 
 class ProductController extends Controller
 {
@@ -24,9 +26,30 @@ class ProductController extends Controller
 
     public function listProductByIdToko($id)
     {
+        $today = Carbon::today();
+
+        // Ambil semua produk berdasarkan ID toko
         $products = Product::where('fk_id_toko', $id)->get();
+
+        // Hitung jumlah total produk
+        $jumlahProduk = $products->count();
+
+        // Hitung produk dengan stok 0
+        $produkStokHabis = $products->where('stock_product', 0)->count();
+
+        // Ambil semua ID produk untuk pengecekan expired
+        $productIds = $products->pluck('id');
+
+        // Hitung produk yang memiliki stok expired
+        $jumlahProdukExpired = TambahStock::whereIn('fk_id_product', $productIds)
+            ->whereDate('expired', '<', $today)
+            ->count();
+
         return response()->json([
-            'id' => '1',
+            'id' => $id,
+            'jumlah_produk' => $jumlahProduk,
+            'jumlah_produk_stok_0' => $produkStokHabis,
+            'jumlah_produk_expired' => $jumlahProdukExpired,
             'data' => $products
         ]);
     }
