@@ -92,4 +92,29 @@ class ProductController extends Controller
         ]);
     }
 
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $tokoId = Kasir::where('fk_id_user', auth()->user()->id)->first()->fk_id_toko ?? '';
+
+        if (!$query || !$tokoId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parameter query dan fk_id_toko dibutuhkan',
+            ], 400);
+        }
+
+        $results = Product::where('fk_id_toko', $tokoId)
+            ->where(function ($q) use ($query) {
+                $q->where('nama_product', 'like', '%' . $query . '%')
+                    ->orWhere('barcode', 'like', '%' . $query . '%');
+            })
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'count' => $results->count(),
+            'data' => $results,
+        ]);
+    }
 }

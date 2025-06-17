@@ -46,7 +46,13 @@ class DataSeeder extends Seeder
 
         // Toko
         Toko::create([
-            'nama_toko' => 'Nama Toko',
+            'nama_toko' => 'Toko 1',
+            'hp_toko' => '081',
+            'alamat_toko' => 'Alamat Toko',
+            'fk_id_manager' => '2',
+        ]);
+        Toko::create([
+            'nama_toko' => 'Toko 2',
             'hp_toko' => '081',
             'alamat_toko' => 'Alamat Toko',
             'fk_id_manager' => '2',
@@ -54,18 +60,33 @@ class DataSeeder extends Seeder
 
         // Kasir
         User::create([
-            'name' => 'kasir',
-            'email' => 'kasir@gmail.com',
+            'name' => 'kasir1',
+            'email' => 'kasir1@gmail.com',
             'level' => '2',
             'status' => '1',
             'password' => Hash::make('12345'),
         ]);
         Kasir::create([
-            'nama_kasir' => 'Nama Kasir',
+            'nama_kasir' => 'Nama Kasir 1',
             'hp_kasir' => '081',
             'alamat_kasir' => 'Alamat Kasir',
             'fk_id_toko' => '1',
             'fk_id_user' => '3',
+        ]);
+        // Kasir
+        User::create([
+            'name' => 'kasir2',
+            'email' => 'kasir2@gmail.com',
+            'level' => '2',
+            'status' => '1',
+            'password' => Hash::make('12345'),
+        ]);
+        Kasir::create([
+            'nama_kasir' => 'Kasir 2',
+            'hp_kasir' => '081',
+            'alamat_kasir' => 'Alamat Kasir',
+            'fk_id_toko' => '2',
+            'fk_id_user' => '4',
         ]);
     }
 }

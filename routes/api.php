@@ -38,14 +38,15 @@ Route::group([
 Route::group([
   'prefix' => 'product'
 ], function () {
-  // Route::group([
-  //   'middleware' => 'auth:api'
-  // ], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
     Route::get('/list', [ProductController::class, 'listProductByToko']);
     Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
     Route::post('/create', [ProductController::class, 'createNewProduct']);
+    Route::get('/search', [ProductController::class, 'search']);
     Route::post('/import', [ProductImportController::class, 'import']);
-  // });
+  });
 });
 
 Route::group([
