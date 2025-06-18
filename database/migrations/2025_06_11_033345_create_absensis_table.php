@@ -17,7 +17,7 @@ class CreateAbsensisTable extends Migration
             $table->id();
             $table->string('foto');
             $table->foreignId('fk_id_jadwal')->constrained('jadwals')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('fk_id_kasir')->constrained('kasirs')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('fk_id_kasir')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
