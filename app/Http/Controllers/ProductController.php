@@ -55,6 +55,31 @@ class ProductController extends Controller
         ]);
     }
 
+    public function listProductByBarcode($barcode)
+    {
+        try {
+            $products = Product::where('barcode', $barcode)->first();
+            if (!$products) {
+                return response()->json([
+                    'id' => '0',
+                    'message' => 'data not found',
+                    'data' => []
+                ]);
+            }
+            return response()->json([
+                'id' => '1',
+                'message' => 'data found',
+                'data' => $products
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'message' => $th->getMessage(),
+                'data' => []
+            ]);
+        }
+    }
+
     public function createNewProduct(Request $request)
     {
         try {

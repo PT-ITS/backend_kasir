@@ -10,7 +10,9 @@ class BiayaOperasionalController extends Controller
     public function list()
     {
         try {
-            $datas = BiayaOperasional::all();
+            $datas = BiayaOperasional::join('tokos', 'biaya_operasionals.fk_id_toko', '=', 'tokos.id')
+                ->select('biaya_operasionals.*', 'tokos.nama_toko')
+                ->get();
             if (!$datas) {
                 return response()->json([
                     'id' => '0',
@@ -35,7 +37,10 @@ class BiayaOperasionalController extends Controller
     public function detail($id)
     {
         try {
-            $datas = BiayaOperasional::find($id);
+            $datas = BiayaOperasional::join('tokos', 'biaya_operasionals.fk_id_toko', '=', 'tokos.id')
+                ->select('biaya_operasionals.*', 'tokos.nama_toko')
+                ->where('id', $id)
+                ->first();
             if (!$datas) {
                 return response()->json([
                     'id' => '0',
@@ -63,6 +68,7 @@ class BiayaOperasionalController extends Controller
             $validateData = $request->validate([
                 'nama_operasional' => 'required',
                 'waktu_operasional' => 'required',
+                'tanggal_bayar' => 'required',
                 'jumlah_biaya' => 'required',
                 'fk_id_toko' => 'required|exists:tokos,id'
             ]);
@@ -70,6 +76,7 @@ class BiayaOperasionalController extends Controller
             $datas = BiayaOperasional::create([
                 'nama_operasional' => $validateData['nama_operasional'],
                 'waktu_operasional' => $validateData['waktu_operasional'],
+                'tanggal_bayar' => $validateData['tanggal_bayar'],
                 'jumlah_biaya' => $validateData['jumlah_biaya'],
                 'fk_id_toko' => $validateData['fk_id_toko'],
             ]);
@@ -94,6 +101,7 @@ class BiayaOperasionalController extends Controller
             $validateData = $request->validate([
                 'nama_operasional' => 'required',
                 'waktu_operasional' => 'required',
+                'tanggal_bayar' => 'required',
                 'jumlah_biaya' => 'required',
                 'fk_id_toko' => 'required|exists:tokos,id'
             ]);
@@ -107,6 +115,7 @@ class BiayaOperasionalController extends Controller
             }
             $datas->nama_operasional = $validateData['nama_operasional'];
             $datas->waktu_operasional = $validateData['waktu_operasional'];
+            $datas->tanggal_bayar = $validateData['tanggal_bayar'];
             $datas->jumlah_biaya = $validateData['jumlah_biaya'];
             $datas->fk_id_toko = $validateData['fk_id_toko'];
             $datas->save();

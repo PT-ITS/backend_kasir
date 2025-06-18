@@ -12,6 +12,7 @@ class BiayaOperasional extends Model
     protected $fillable = [
         'nama_operasional',
         'waktu_operasional',
+        'tanggal_bayar',
         'jumlah_biaya',
         'fk_id_toko',
     ];

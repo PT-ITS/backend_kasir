@@ -17,6 +17,7 @@ class CreateBiayaOperasionalsTable extends Migration
             $table->id();
             $table->string('nama_operasional');
             $table->string('waktu_operasional');
+            $table->date('tanggal_bayar');
             $table->string('jumlah_biaya');
             $table->foreignId('fk_id_toko')->constrained('tokos')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
