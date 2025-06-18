@@ -61,4 +61,22 @@ class StockController extends Controller
             ], 500);
         }
     }
+
+    public function listCatatanStock($id)
+    {
+        $stocks = TambahStock::with(['product', 'catatanStock'])
+                    ->where('fk_id_product', $id)
+                    ->get();
+
+        $result = $stocks->map(function ($item) {
+            return [
+                'tanggal' => optional($item->catatanStock)->tanggal ?? '-',
+                'product' => optional($item->product)->nama ?? '-',
+                'jumlah' => $item->jumlah,
+                'harga_beli' => $item->harga_beli,
+            ];
+        });
+
+        return response()->json($result);
+    }
 }
