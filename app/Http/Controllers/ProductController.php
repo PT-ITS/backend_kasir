@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Kasir;
+use App\Models\Manager;
 use App\Models\CatatanStock;
 use App\Models\TambahStock;
 use App\Models\Toko;
@@ -107,7 +108,7 @@ class ProductController extends Controller
             'harga_jual' => 'required',
         ]);
 
-        $levelUser = Kasir::where('fk_id_user', auth()->user()->id)->first()->level ?? '';
+        $levelUser = Manager::where('fk_id_user', auth()->user()->id)->first()->level ?? '';
 
         if ($levelUser != '1') {
             return response()->json([
@@ -141,7 +142,7 @@ class ProductController extends Controller
                 'id_product' => 'required'
             ]);
 
-            $levelUser = Kasir::where('fk_id_user', auth()->user()->id)->first()->level ?? '';
+            $levelUser = Manager::where('fk_id_user', auth()->user()->id)->first()->level ?? '';
 
             if ($levelUser != '1') {
                 return response()->json([
