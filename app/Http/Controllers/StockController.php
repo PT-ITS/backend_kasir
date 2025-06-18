@@ -77,6 +77,9 @@ class StockController extends Controller
             ];
         });
 
-        return response()->json($result);
+        return response()->json([
+            'id' => '1',
+            'data' => $result,
+        ]);
     }
 }
