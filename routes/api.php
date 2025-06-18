@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\TokoController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\StockController;
 
 Route::group([
   'prefix' => 'auth'
@@ -49,6 +50,17 @@ Route::group([
     Route::post('/delete', [ProductController::class, 'deleteProduct']);
     Route::get('/search', [ProductController::class, 'search']);
     Route::post('/import', [ProductImportController::class, 'import']);
+  });
+});
+
+Route::group([
+  'prefix' => 'stock'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('/detail/{id}', [StockController::class, 'listCatatanStock']);
+    Route::post('/tambah', [StockController::class, 'belanjaStock']);
   });
 });
 
