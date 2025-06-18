@@ -45,6 +45,8 @@ Route::group([
     Route::get('/list/{id}', [ProductController::class, 'listProductByIdToko']);
     Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
     Route::post('/create', [ProductController::class, 'createNewProduct']);
+    Route::post('/update-harga', [ProductController::class, 'updateHargaProduct']);
+    Route::post('/delete', [ProductController::class, 'deleteProduct']);
     Route::get('/search', [ProductController::class, 'search']);
     Route::post('/import', [ProductImportController::class, 'import']);
   });

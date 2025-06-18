@@ -107,6 +107,15 @@ class ProductController extends Controller
             'harga_jual' => 'required',
         ]);
 
+        $levelUser = Kasir::where('fk_id_user', auth()->user()->id)->first()->level ?? '';
+
+        if ($levelUser != '1') {
+            return response()->json([
+                'id' => '0',
+                'data' => 'anda tidak memiliki akses untuk aksi ini'
+            ]);
+        }
+
         $products = Product::find($validateData['id_product']);
 
         if (!$products) {
@@ -123,6 +132,36 @@ class ProductController extends Controller
             'id' => '1',
             'data' => 'harga product berhasil di update'
         ]);
+    }
+
+    public function deleteProduct(Request $request)
+    {
+        try {
+            $validateData = $request->validate([
+                'id_product' => 'required'
+            ]);
+
+            $levelUser = Kasir::where('fk_id_user', auth()->user()->id)->first()->level ?? '';
+
+            if ($levelUser != '1') {
+                return response()->json([
+                    'id' => '0',
+                    'data' => 'anda tidak memiliki akses untuk aksi ini'
+                ]);
+            }
+
+
+            Product::find($validateData['id_product'])->delete();
+            return response()->json([
+                'id' => '1',
+                'data' => 'product berhasil di delete'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'data' => $th->getMessage()
+            ]);
+        }
     }
 
     public function search(Request $request)
