@@ -6,6 +6,7 @@ use App\Models\CatatanStock;
 use App\Models\TambahStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StockController extends Controller
 {
@@ -13,7 +14,7 @@ class StockController extends Controller
     {
         $validated = $request->validate([
             'total_harga' => 'required|string',
-            'bukti_nota' => 'required|string',
+            'bukti_nota' => 'required',
             'tanggal_belanja' => 'required|date',
             'fk_id_toko' => 'required|exists:tokos,id',
             'details' => 'required|array|min:1',
@@ -26,10 +27,17 @@ class StockController extends Controller
         try {
             DB::beginTransaction();
 
+            // Save to storage
+            $file = $validated['bukti_nota'];
+            $filePath = $file->store('bukti_nota', 'public');
+            $fileContent = file_get_contents($file->getRealPath());
+            Storage::disk('public')->put($filePath, $fileContent);
+            $buktiNotaName = $filePath;
+
             // Simpan catatan stok utama
             $catatanStock = CatatanStock::create([
                 'total_harga' => $validated['total_harga'],
-                'bukti_nota' => $validated['bukti_nota'],
+                'bukti_nota' => $buktiNotaName,
                 'tanggal_belanja' => $validated['tanggal_belanja'],
                 'fk_id_toko' => $validated['fk_id_toko'],
             ]);
@@ -65,8 +73,8 @@ class StockController extends Controller
     public function listCatatanStock($id)
     {
         $stocks = TambahStock::with(['product', 'catatanStock'])
-                    ->where('fk_id_product', $id)
-                    ->get();
+            ->where('fk_id_product', $id)
+            ->get();
 
         $result = $stocks->map(function ($item) {
             return [
@@ -80,6 +88,33 @@ class StockController extends Controller
         return response()->json([
             'id' => '1',
             'data' => $result,
+        ]);
+    }
+
+    public function list()
+    {
+        $catatan = CatatanStock::with(['tambahStocks.product'])->get();
+        return response()->json([
+            'id' => '1',
+            'message' => 'Success',
+            'data' => $catatan,
+        ]);
+        return response()->json($catatan);
+    }
+
+    public function delete($id)
+    {
+        $catatan = CatatanStock::findOrFail($id);
+        if ($catatan->bukti_nota) {
+            Storage::disk('public')->delete($catatan->bukti_nota);
+        }
+        $catatan->tambahStocks()->delete(); // delete details first
+        $catatan->delete();
+
+        return response()->json([
+            'id' => '1',
+            'message' => 'Data deleted',
+            'data' => []
         ]);
     }
 }

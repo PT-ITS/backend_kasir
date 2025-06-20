@@ -29,6 +29,8 @@ class ProductController extends Controller
     {
         $today = Carbon::today();
 
+        $toko = Toko::find($id);
+
         // Ambil semua produk berdasarkan ID toko
         $products = Product::where('fk_id_toko', $id)->get();
 
@@ -48,6 +50,7 @@ class ProductController extends Controller
 
         return response()->json([
             'id' => $id,
+            'nama_toko' => $toko->nama_toko,
             'jumlah_produk' => $jumlahProduk,
             'jumlah_produk_stok_0' => $produkStokHabis,
             'jumlah_produk_expired' => $jumlahProdukExpired,
