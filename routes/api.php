@@ -62,7 +62,7 @@ Route::group([
   ], function () {
     Route::get('/detail/{id}', [StockController::class, 'listCatatanStock']);
     Route::post('/tambah', [StockController::class, 'belanjaStock']);
-    Route::get('/list', [StockController::class, 'list']);
+    Route::get('/list/{id}', [StockController::class, 'listStockByIdToko']);
     Route::delete('/delete/{id}', [StockController::class, 'delete']);
   });
 });

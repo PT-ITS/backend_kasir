@@ -97,15 +97,19 @@ class StockController extends Controller
         ]);
     }
 
-    public function list()
+    public function listStockByIdToko($id)
     {
-        $catatan = CatatanStock::with(['tambahStocks.product'])->get();
+        $catatanStocks = CatatanStock::whereHas('tambahStocks.product', function ($query) use ($id) {
+            $query->where('fk_id_toko', $id);
+        })
+            ->with(['tambahStocks.product'])
+            ->get();
         return response()->json([
             'id' => '1',
             'message' => 'Success',
-            'data' => $catatan,
+            'data' => $catatanStocks,
         ]);
-        return response()->json($catatan);
+        return response()->json($catatanStocks);
     }
 
     public function delete($id)
