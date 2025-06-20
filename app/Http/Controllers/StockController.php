@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CatatanStock;
 use App\Models\TambahStock;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -44,6 +45,11 @@ class StockController extends Controller
 
             // Simpan semua detail tambah stok
             foreach ($validated['details'] as $item) {
+
+                Product::where('id', $item['fk_id_product'])->update([
+                    'harga_pokok' => $item['harga_beli']
+                ]);
+
                 TambahStock::create([
                     'jumlah' => $item['jumlah'],
                     'harga_beli' => $item['harga_beli'],
