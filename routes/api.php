@@ -42,7 +42,7 @@ Route::group([
   Route::group([
     'middleware' => 'auth:api'
   ], function () {
-    Route::get('/list', [ProductController::class, 'listProductByToko']);
+    Route::get('/list', [ProductController::class, 'listProductByToko']); // khusus kasir
     Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
     Route::post('/create', [ProductController::class, 'createNewProduct']);
     Route::post('/update-harga', [ProductController::class, 'updateHargaProduct']);
