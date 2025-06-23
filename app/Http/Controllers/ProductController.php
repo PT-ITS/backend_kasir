@@ -61,7 +61,10 @@ class ProductController extends Controller
     public function listProductByBarcode($barcode)
     {
         try {
-            $products = Product::where('barcode', $barcode)->first();
+            $idToko = Kasir::where('fk_id_user', auth()->user()->id)->first();
+            $products = Product::where('fk_id_toko', $idToko->fk_id_toko)
+                ->where('barcode', $barcode)
+                ->first();
             if (!$products) {
                 return response()->json([
                     'id' => '0',
