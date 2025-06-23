@@ -17,7 +17,7 @@ class ProductImport implements ToModel, WithHeadingRow
             'satuan' => (string) $row['satuan'],
             'jenis' => $row['jenis'],
             'merek' => $row['merek'],
-            'fk_id_toko' => '1', 
+            'fk_id_toko' => $row['id_toko'],
             'stock_product' => 0, // default stock
             'harga_jual' => 0     // default harga_jual
         ]);

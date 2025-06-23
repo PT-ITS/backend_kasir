@@ -12,6 +12,7 @@ use App\Models\TambahStock;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use DB;
+use Illuminate\Support\Facades\Storage;
 
 class TokoController extends Controller
 {
@@ -260,6 +261,7 @@ class TokoController extends Controller
             $totalItem = $trx->items->sum('jumlah_product');
             return [
                 'id' => $trx->id,
+                'no_invoice' => $trx->no_invoice,
                 'total_bayar' => $trx->total_bayar,
                 'total_modal' => $trx->total_modal,
                 'jenis_transaksi' => $trx->jenis_transaksi,
@@ -390,14 +392,21 @@ class TokoController extends Controller
                 'nama_toko' => 'required',
                 'hp_toko' => 'required',
                 'alamat_toko' => 'required',
-                'fk_id_manager' => 'required|exists:users,id'
+                'fk_id_manager' => 'required|exists:users,id',
+                'logo_toko' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
             ]);
+
+            $logoPath = null;
+            if ($request->hasFile('logo_toko')) {
+                $logoPath = $request->file('logo_toko')->store('logo_toko', 'public');
+            }
 
             $datas = Toko::create([
                 'nama_toko' => $validateData['nama_toko'],
                 'hp_toko' => $validateData['hp_toko'],
                 'alamat_toko' => $validateData['alamat_toko'],
                 'fk_id_manager' => $validateData['fk_id_manager'],
+                'logo_toko' => $logoPath,
             ]);
 
             return response()->json([
@@ -421,8 +430,10 @@ class TokoController extends Controller
                 'nama_toko' => 'required',
                 'hp_toko' => 'required',
                 'alamat_toko' => 'required',
-                'fk_id_manager' => 'required|exists:users,id'
+                'fk_id_manager' => 'required|exists:users,id',
+                'logo_toko' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
+
             $datas = Toko::find($id);
             if (!$datas) {
                 return response()->json([
@@ -431,6 +442,17 @@ class TokoController extends Controller
                     'data' => []
                 ]);
             }
+
+            // handle logo baru
+            if ($request->hasFile('logo_toko')) {
+                // hapus logo lama jika ada
+                if ($datas->logo_toko && Storage::disk('public')->exists($datas->logo_toko)) {
+                    Storage::disk('public')->delete($datas->logo_toko);
+                }
+                // simpan logo baru
+                $datas->logo_toko = $request->file('logo_toko')->store('logo_toko', 'public');
+            }
+
             $datas->nama_toko = $validateData['nama_toko'];
             $datas->hp_toko = $validateData['hp_toko'];
             $datas->alamat_toko = $validateData['alamat_toko'];
@@ -450,12 +472,17 @@ class TokoController extends Controller
             ]);
         }
     }
+
     public function delete($id)
     {
         try {
             $datas = Toko::find($id);
             if ($datas) {
+                if ($datas->logo_toko && Storage::disk('public')->exists($datas->logo_toko)) {
+                    Storage::disk('public')->delete($datas->logo_toko);
+                }
                 $datas->delete();
+
                 return response()->json([
                     'id' => '1',
                     'message' => 'success',

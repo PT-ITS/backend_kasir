@@ -86,6 +86,43 @@ class ProductController extends Controller
         }
     }
 
+    public function listProductByNama(Request $request)
+    {
+        try {
+            $nama = $request->query('nama_product');
+            if (!$nama) {
+                return response()->json([
+                    'id' => '0',
+                    'message' => 'Parameter nama_product wajib diisi.',
+                    'data' => []
+                ]);
+            }
+
+            $idToko = Kasir::where('fk_id_user', auth()->user()->id)->first();
+            $product = Product::where('fk_id_toko', $idToko->fk_id_toko)
+                ->where('nama_product', 'like', '%' . $nama . '%')
+                ->get();
+            if (!$product) {
+                return response()->json([
+                    'id' => '0',
+                    'message' => 'data not found',
+                    'data' => []
+                ]);
+            }
+            return response()->json([
+                'id' => '1',
+                'message' => 'data found',
+                'data' => $product
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'message' => $th->getMessage(),
+                'data' => []
+            ]);
+        }
+    }
+
     public function createNewProduct(Request $request)
     {
         try {
@@ -147,6 +184,10 @@ class ProductController extends Controller
         $validateData = $request->validate([
             'id_product' => 'required',
             'harga_jual' => 'required',
+            'harga_pokok' => 'required',
+            'satuan' => 'required',
+            'jenis' => 'required',
+            'merek' => 'required',
         ]);
 
         $levelUser = User::find(auth()->user()->id)->level ?? '';
@@ -168,6 +209,10 @@ class ProductController extends Controller
         }
 
         $products->harga_jual = $validateData['harga_jual'];
+        $products->harga_pokok = $validateData['harga_pokok'];
+        $products->satuan = $validateData['satuan'];
+        $products->jenis = $validateData['jenis'];
+        $products->merek = $validateData['merek'];
         $products->save();
 
         return response()->json([
