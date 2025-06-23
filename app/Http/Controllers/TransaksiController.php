@@ -35,6 +35,7 @@ class TransaksiController extends Controller
     public function createTransaksi(Request $request)
     {
         $request->validate([
+            'no_invoice' => 'required|numeric',
             'total_bayar' => 'required|numeric',
             'total_modal' => 'required|numeric',
             'jenis_transaksi' => 'required|string',

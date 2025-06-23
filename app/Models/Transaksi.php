@@ -10,6 +10,7 @@ class Transaksi extends Model
     use HasFactory;
 
     protected $fillable = [
+        'no_invoice',
         'total_bayar',
         'total_modal',
         'jenis_transaksi',
@@ -22,3 +23,6 @@ class Transaksi extends Model
         return $this->hasMany(TransaksiItem::class, 'fk_id_transaksi');
     }
 }
+
+
+
