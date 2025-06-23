@@ -15,6 +15,7 @@ class CreateTransaksisTable extends Migration
     {
         Schema::create('transaksis', function (Blueprint $table) {
             $table->id();
+            $table->string('no_invoice');
             $table->integer('total_bayar');
             $table->integer('total_modal');
             $table->enum('jenis_transaksi', [

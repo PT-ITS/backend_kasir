@@ -15,7 +15,7 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_product')->nullable();
+            $table->string('kode_product');
             $table->string('nama_product');
             $table->string('stock_product')->nullable();
             $table->string('harga_jual')->nullable();
@@ -28,8 +28,8 @@ class CreateProductsTable extends Migration
                 '3', //gr/kg
                 '4', //l/ml
             ])->default('0');
-            $table->string('jenis')->nullable();
-            $table->string('merek')->nullable();
+            $table->string('jenis');
+            $table->string('merek');
             $table->foreignId('fk_id_toko')->constrained('tokos')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
