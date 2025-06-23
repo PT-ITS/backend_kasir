@@ -90,18 +90,28 @@ class ProductController extends Controller
     {
         try {
             $validateData = $request->validate([
+                'kode_product' => 'required',
                 'nama_product' => 'required',
                 'stock_product' => 'required',
                 'harga_jual' => 'required',
+                'harga_pokok' => 'required',
                 'barcode' => 'required',
+                'satuan' => 'required',
+                'jenis' => 'required',
+                'merek' => 'required',
                 'fk_id_toko' => 'required|exists:tokos,id'
             ]);
 
             $products = Product::create([
+                'kode_product' => $validateData['kode_product'],
                 'nama_product' => $validateData['nama_product'],
                 'stock_product' => $validateData['stock_product'],
                 'harga_jual' => $validateData['harga_jual'],
+                'harga_pokok' => $validateData['harga_pokok'],
                 'barcode' => $validateData['barcode'],
+                'satuan' => $validateData['satuan'],
+                'jenis' => $validateData['jenis'],
+                'merek' => $validateData['merek'],
                 'fk_id_toko' => $validateData['fk_id_toko']
             ]);
 
