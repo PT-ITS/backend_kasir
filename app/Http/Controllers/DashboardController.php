@@ -15,67 +15,54 @@ class DashboardController extends Controller
     public function laporanSemuaToko(Request $request)
     {
         $filterTahun = $request->query('tahun');
+        if (!$filterTahun) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Parameter tahun wajib'
+            ], 400);
+        }
 
-        // Buat closure untuk filter
-        $filterScope = function ($query) use ($filterTahun) {
-            if ($filterTahun) $query->whereYear('created_at', $filterTahun);
-        };
+        // Pastikan tahun jadi string
+        $tahunStr = (string) $filterTahun;
 
-        // Ambil modal, pemasukan, pengeluaran sesuai filter
+        // Query modal
         $modal = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_modal')
-            ->when($filterTahun, fn($q) => $q->whereYear('created_at', $filterTahun))
+            ->whereYear('created_at', $tahunStr)
             ->groupBy('tahun')
             ->pluck('total_modal', 'tahun');
 
+        // Query pemasukan
         $pemasukan = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_bayar) as total_pemasukan')
-            ->when($filterTahun, fn($q) => $q->whereYear('created_at', $filterTahun))
+            ->whereYear('created_at', $tahunStr)
             ->groupBy('tahun')
             ->pluck('total_pemasukan', 'tahun');
 
+        // Query pengeluaran
         $pengeluaran = BiayaOperasional::selectRaw('YEAR(created_at) as tahun, SUM(jumlah_biaya) as total_pengeluaran')
-            ->when($filterTahun, fn($q) => $q->whereYear('created_at', $filterTahun))
+            ->whereYear('created_at', $tahunStr)
             ->groupBy('tahun')
             ->pluck('total_pengeluaran', 'tahun');
 
-        $laporan = [];
+        // Ambil data hanya tahun filter
+        $m = $modal[$tahunStr] ?? 0;
+        $p = $pemasukan[$tahunStr] ?? 0;
+        $k = $pengeluaran[$tahunStr] ?? 0;
+        $laba = $p - ($m + $k);
 
-        if ($filterTahun) {
-            // Jika filter tahun ada, fokus hanya di tahun itu
-            $tahun = intval($filterTahun);
-            $laporan[] = [
-                'tahun' => $tahun,
-                'total_modal' => $modal[$tahun] ?? 0,
-                'total_pemasukan' => $pemasukan[$tahun] ?? 0,
-                'total_pengeluaran' => $pengeluaran[$tahun] ?? 0,
-                'laba_bersih' => ($pemasukan[$tahun] ?? 0) - (($modal[$tahun] ?? 0) + ($pengeluaran[$tahun] ?? 0)),
-            ];
-        } else {
-            // Tanpa filter: tampilkan semua tahun
-            $tahunGabungan = collect($modal->keys())
-                ->merge($pemasukan->keys())
-                ->merge($pengeluaran->keys())
-                ->unique()
-                ->sort();
-
-            foreach ($tahunGabungan as $tahun) {
-                $m = $modal[$tahun] ?? 0;
-                $p = $pemasukan[$tahun] ?? 0;
-                $k = $pengeluaran[$tahun] ?? 0;
-                $laporan[] = [
-                    'tahun' => $tahun,
-                    'total_modal' => $m,
-                    'total_pemasukan' => $p,
-                    'total_pengeluaran' => $k,
-                    'laba_bersih' => $p - ($m + $k),
-                ];
-            }
-        }
+        $laporan = [
+            'tahun' => (int)$tahunStr,
+            'total_modal' => $m,
+            'total_pemasukan' => $p,
+            'total_pengeluaran' => $k,
+            'laba_bersih' => $laba
+        ];
 
         return response()->json([
-            'id' => '1',
+            'status' => 'success',
             'data' => $laporan
         ]);
     }
+
 
 
 
