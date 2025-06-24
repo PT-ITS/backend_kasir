@@ -14,7 +14,7 @@ class DashboardController extends Controller
     //modal, pengeluaran, pemasukan, laba bersih
     public function laporanSemuaToko(Request $request)
     {
-        $filterTahun = $request->query('tahun');
+        $filterTahun = $request->input('tahun');
         if (!$filterTahun) {
             return response()->json([
                 'status' => 'error',
