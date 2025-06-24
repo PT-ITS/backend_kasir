@@ -161,9 +161,8 @@ class TokoController extends Controller
 
             foreach ($transaksiHariIni as $trx) {
                 foreach ($trx->items as $item) {
-                    $productId = $item->fk_id_product;
-                    $avgHargaBeli = TambahStock::where('fk_id_product', $productId)->avg('harga_beli') ?? 0;
-                    $keuntunganPerItem = ($item->harga_jual_product - $avgHargaBeli) * $item->jumlah_product;
+                    $hargaPokok = $item->product->harga_pokok ?? 0;
+                    $keuntunganPerItem = ($item->harga_jual_product - $hargaPokok) * $item->jumlah_product;
                     $keuntunganHariIni += $keuntunganPerItem;
                 }
             }
@@ -187,9 +186,8 @@ class TokoController extends Controller
 
                 foreach ($transaksiHarian as $trx) {
                     foreach ($trx->items as $item) {
-                        $productId = $item->fk_id_product;
-                        $avgHargaBeli = TambahStock::where('fk_id_product', $productId)->avg('harga_beli') ?? 0;
-                        $keuntunganPerItem = ($item->harga_jual_product - $avgHargaBeli) * $item->jumlah_product;
+                        $hargaPokok = $item->product->harga_pokok ?? 0;
+                        $keuntunganPerItem = ($item->harga_jual_product - $hargaPokok) * $item->jumlah_product;
                         $pendapatanHari += $keuntunganPerItem;
                     }
                 }
@@ -249,9 +247,8 @@ class TokoController extends Controller
 
         foreach ($transaksiHariIni as $trx) {
             foreach ($trx->items as $item) {
-                $productId = $item->fk_id_product;
-                $avgHargaBeli = TambahStock::where('fk_id_product', $productId)->avg('harga_beli') ?? 0;
-                $keuntunganPerItem = ($item->harga_jual_product - $avgHargaBeli) * $item->jumlah_product;
+                $hargaPokok = $item->product->harga_pokok ?? 0;
+                $keuntunganPerItem = ($item->harga_jual_product - $hargaPokok) * $item->jumlah_product;
                 $keuntunganHariIni += $keuntunganPerItem;
             }
         }
@@ -275,15 +272,18 @@ class TokoController extends Controller
             ->whereIn('fk_id_transaksi', $transaksiIds)
             ->whereDate('created_at', $today)
             ->get()
-            ->map(function ($item) {
+            ->groupBy('fk_id_product')
+            ->map(function ($group) {
+                $firstItem = $group->first();
                 return [
-                    'id' => $item->id,
-                    'jumlah_product' => $item->jumlah_product,
-                    'harga_jual_product' => $item->harga_jual_product,
-                    'nama_product' => optional($item->product)->nama_product,
-                    'created_at' => $item->created_at,
+                    'fk_id_product' => $firstItem->fk_id_product,
+                    'nama_product' => optional($firstItem->product)->nama_product,
+                    'jumlah_product' => $group->sum('jumlah_product'),
+                    'harga_jual_product' => $firstItem->harga_jual_product, // or avg if you need: $group->avg('harga_jual_product')
                 ];
-            });
+            })
+            ->values(); // reset keys
+
 
         return response()->json([
             'id_toko' => $toko->id,

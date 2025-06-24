@@ -50,6 +50,8 @@ class StockController extends Controller
                     'harga_pokok' => $item['harga_beli']
                 ]);
 
+                Product::where('id', $item['fk_id_product'])->increment('stock_product', $item['jumlah']);
+
                 TambahStock::create([
                     'jumlah' => $item['jumlah'],
                     'harga_beli' => $item['harga_beli'],
@@ -88,6 +90,7 @@ class StockController extends Controller
                 'product' => optional($item->product)->nama_product ?? '-',
                 'jumlah' => $item->jumlah,
                 'harga_beli' => $item->harga_beli,
+                'expired' => $item->expired,
             ];
         });
 
