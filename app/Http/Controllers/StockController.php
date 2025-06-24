@@ -84,8 +84,8 @@ class StockController extends Controller
 
         $result = $stocks->map(function ($item) {
             return [
-                'tanggal' => optional($item->catatanStock)->tanggal ?? '-',
-                'product' => optional($item->product)->nama ?? '-',
+                'tanggal' => optional($item->catatanStock)->tanggal_belanja ?? '-',
+                'product' => optional($item->product)->nama_product ?? '-',
                 'jumlah' => $item->jumlah,
                 'harga_beli' => $item->harga_beli,
             ];
