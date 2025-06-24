@@ -18,8 +18,10 @@ class CreateProductsTable extends Migration
             $table->string('kode_product');
             $table->string('nama_product');
             $table->string('stock_product')->nullable();
-            $table->string('harga_jual')->nullable();
-            $table->string('harga_pokok')->nullable(); // uptodate setiap kali restock
+            $table->integer('harga_jual')->nullable();
+            $table->integer('harga_pokok')->nullable(); // uptodate se tiap kali restock
+            $table->integer('harga_grosir')->nullable(); // uptodate se tiap kali restock
+            $table->integer('sk_grosir')->nullable(); // uptodate se tiap kali restock
             $table->string('barcode');
             $table->enum('satuan', [
                 '0', //pcs
@@ -28,7 +30,7 @@ class CreateProductsTable extends Migration
                 '3', //gr/kg
                 '4', //l/ml
             ])->default('0');
-            $table->string('jenis');
+            $table->string('jenis');  
             $table->string('merek');
             $table->foreignId('fk_id_toko')->constrained('tokos')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
