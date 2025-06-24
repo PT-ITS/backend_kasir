@@ -14,61 +14,69 @@ class DashboardController extends Controller
     //modal, pengeluaran, pemasukan, laba bersih
     public function laporanSemuaToko(Request $request)
     {
-        // Ambil parameter tahun dari request (misalnya ?tahun=2024)
         $filterTahun = $request->query('tahun');
 
-        // Jika ada filter tahun, tambahkan ke query
-        $modalQuery = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_modal')
-            ->when($filterTahun, function ($query) use ($filterTahun) {
-                $query->whereYear('created_at', $filterTahun);
-            })
+        // Buat closure untuk filter
+        $filterScope = function ($query) use ($filterTahun) {
+            if ($filterTahun) $query->whereYear('created_at', $filterTahun);
+        };
+
+        // Ambil modal, pemasukan, pengeluaran sesuai filter
+        $modal = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_modal')
+            ->when($filterTahun, fn($q) => $q->whereYear('created_at', $filterTahun))
             ->groupBy('tahun')
             ->pluck('total_modal', 'tahun');
 
-        $pemasukanQuery = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_bayar) as total_pemasukan')
-            ->when($filterTahun, function ($query) use ($filterTahun) {
-                $query->whereYear('created_at', $filterTahun);
-            })
+        $pemasukan = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_bayar) as total_pemasukan')
+            ->when($filterTahun, fn($q) => $q->whereYear('created_at', $filterTahun))
             ->groupBy('tahun')
             ->pluck('total_pemasukan', 'tahun');
 
-        $pengeluaranQuery = BiayaOperasional::selectRaw('YEAR(created_at) as tahun, SUM(jumlah_biaya) as total_pengeluaran')
-            ->when($filterTahun, function ($query) use ($filterTahun) {
-                $query->whereYear('created_at', $filterTahun);
-            })
+        $pengeluaran = BiayaOperasional::selectRaw('YEAR(created_at) as tahun, SUM(jumlah_biaya) as total_pengeluaran')
+            ->when($filterTahun, fn($q) => $q->whereYear('created_at', $filterTahun))
             ->groupBy('tahun')
             ->pluck('total_pengeluaran', 'tahun');
 
-        // Gabungkan semua tahun yang tersedia dari 3 sumber
-        $tahunGabungan = collect($modalQuery->keys())
-            ->merge($pemasukanQuery->keys())
-            ->merge($pengeluaranQuery->keys())
-            ->unique();
-
-        // Buat laporan per tahun
         $laporan = [];
 
-        foreach ($tahunGabungan as $tahun) {
-            $m = $modalQuery[$tahun] ?? 0;
-            $p = $pemasukanQuery[$tahun] ?? 0;
-            $k = $pengeluaranQuery[$tahun] ?? 0;
-
-            $labaBersih = $p - ($m + $k);
-
+        if ($filterTahun) {
+            // Jika filter tahun ada, fokus hanya di tahun itu
+            $tahun = intval($filterTahun);
             $laporan[] = [
                 'tahun' => $tahun,
-                'total_modal' => $m,
-                'total_pemasukan' => $p,
-                'total_pengeluaran' => $k,
-                'laba_bersih' => $labaBersih
+                'total_modal' => $modal[$tahun] ?? 0,
+                'total_pemasukan' => $pemasukan[$tahun] ?? 0,
+                'total_pengeluaran' => $pengeluaran[$tahun] ?? 0,
+                'laba_bersih' => ($pemasukan[$tahun] ?? 0) - (($modal[$tahun] ?? 0) + ($pengeluaran[$tahun] ?? 0)),
             ];
+        } else {
+            // Tanpa filter: tampilkan semua tahun
+            $tahunGabungan = collect($modal->keys())
+                ->merge($pemasukan->keys())
+                ->merge($pengeluaran->keys())
+                ->unique()
+                ->sort();
+
+            foreach ($tahunGabungan as $tahun) {
+                $m = $modal[$tahun] ?? 0;
+                $p = $pemasukan[$tahun] ?? 0;
+                $k = $pengeluaran[$tahun] ?? 0;
+                $laporan[] = [
+                    'tahun' => $tahun,
+                    'total_modal' => $m,
+                    'total_pemasukan' => $p,
+                    'total_pengeluaran' => $k,
+                    'laba_bersih' => $p - ($m + $k),
+                ];
+            }
         }
 
         return response()->json([
-            'status' => 'success',
+            'id' => '1',
             'data' => $laporan
         ]);
     }
+
 
 
 
@@ -148,7 +156,7 @@ class DashboardController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'id' => '1',
             'data' => $laporan
         ]);
     }

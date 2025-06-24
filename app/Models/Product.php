@@ -15,6 +15,8 @@ class Product extends Model
         'stock_product',
         'harga_jual',
         'harga_pokok',
+        'harga_grosir',
+        'sk_grosir',
         'barcode',
         'satuan',
         'jenis',
