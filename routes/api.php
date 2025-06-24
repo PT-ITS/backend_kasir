@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\TokoController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\DashboardController;
 
 Route::group([
   'prefix' => 'auth'
@@ -65,6 +66,17 @@ Route::group([
     Route::post('/tambah', [StockController::class, 'belanjaStock']);
     Route::get('/list/{id}', [StockController::class, 'listStockByIdToko']);
     Route::delete('/delete/{id}', [StockController::class, 'delete']);
+  });
+});
+
+Route::group([
+  'prefix' => 'dashboard'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('/laporan-per-toko', [DashboardController::class, 'laporanPerToko']);
+    Route::post('/laporan-tahunan', [DashboardController::class, 'laporanSemuaToko']);
   });
 });
 
