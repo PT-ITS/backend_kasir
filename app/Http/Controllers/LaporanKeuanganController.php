@@ -40,18 +40,28 @@ class LaporanKeuanganController extends Controller
                 ];
             });
 
-        // 2. Data Transaksi (pendapatan)
+        // Total pengeluaran operasional
+        $totalOperasional = $operasional->sum('kredit');
+
+        // 2. Data Transaksi: Kelompokkan berdasarkan tanggal
         $transaksi = Transaksi::where('fk_id_toko', $tokoId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get()
-            ->map(function ($item) {
+            ->groupBy(function ($item) {
+                return Carbon::parse($item->created_at)->toDateString();
+            })
+            ->map(function ($items, $tanggal) {
                 return [
-                    'tanggal' => Carbon::parse($item->created_at)->toDateString(),
+                    'tanggal' => $tanggal,
                     'keterangan' => 'Pendapatan Harian',
-                    'debit' => (int) $item->total_bayar,
-                    'kredit' => 0
+                    'debit' => $items->sum('total_bayar'),
+                    'kredit' => 0,
                 ];
-            });
+            })
+            ->values();
+
+        // Total pemasukan
+        $totalPemasukan = $transaksi->sum('debit');
 
         // 3. Data Belanja Barang
         $belanja = CatatanStock::where('fk_id_toko', $tokoId)
@@ -66,15 +76,30 @@ class LaporanKeuanganController extends Controller
                 ];
             });
 
-        // Gabung dan urutkan berdasarkan tanggal
+        // Total belanja
+        $totalBelanja = $belanja->sum('kredit');
+
+        // Gabungkan semua transaksi keuangan dan urutkan berdasarkan tanggal
         $keuangan = $transaksi->merge($belanja)->sortBy('tanggal')->values();
+
+        // Hitung total pengeluaran (operasional + belanja)
+        $totalPengeluaran = $totalBelanja + $totalOperasional;
+
+        // Hitung keuntungan
+        $keuntungan = $totalPemasukan - $totalPengeluaran;
 
         // Response final
         return response()->json([
             'id' => '1',
             'data' => [
                 'operasional' => $operasional,
-                'keuangan' => $keuangan
+                'keuangan' => $keuangan,
+                'ringkasan' => [
+                    'total_pemasukan' => $totalPemasukan,
+                    'total_pengeluaran' => $totalPengeluaran,
+                    'total_belanja' => $totalBelanja,
+                    'keuntungan' => $keuntungan
+                ]
             ]
         ]);
     }
