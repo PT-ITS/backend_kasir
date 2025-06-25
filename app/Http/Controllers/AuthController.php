@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\Kasir;
+use App\Models\LogActivity;
 use DateTimeZone;
 use DateTime;
 use App\Mail\EmailVerification;
@@ -102,6 +103,12 @@ class AuthController extends Controller
         $tokenWithClaims = JWTAuth::claims($customClaims)->fromUser($user);
         $user->active_token = $tokenWithClaims;
         $user->save();
+
+        LogActivity::create([
+            'level' => $user->level,
+            'nama' => $user->name,
+            'keterangan' => 'Login',
+        ]);
         return $this->respondWithToken($tokenWithClaims);
     }
 

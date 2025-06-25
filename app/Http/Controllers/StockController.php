@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CatatanStock;
 use App\Models\TambahStock;
 use App\Models\Product;
+use App\Models\LogActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -59,6 +60,12 @@ class StockController extends Controller
                 ]);
             }
 
+
+            LogActivity::create([
+                'level' => auth()->user()->name,
+                'nama' => auth()->user()->name,
+                'keterangan' => 'Menambahkan stock',
+            ]);
             DB::commit();
 
             return response()->json([
