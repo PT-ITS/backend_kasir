@@ -7,10 +7,39 @@ use App\Models\Transaksi;
 use App\Models\TransaksiItem;
 use App\Models\Toko;
 use App\Models\BiayaOperasional;
-
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function getYears()
+    {
+        // Get all distinct years from transaksi
+        $availableYears = Transaksi::select(DB::raw('YEAR(created_at) as year'))
+            ->distinct()
+            ->orderBy('year')
+            ->pluck('year')
+            ->toArray();
+
+        if (empty($availableYears)) {
+            return response()->json([
+                'id' => '0',
+                'data' => [],
+            ]);
+        }
+
+        $minYear = min($availableYears);
+        $maxYear = max($availableYears);
+
+        // Create a full range: 2 years before min, to 2 years after max
+        $allYears = range($minYear - 2, $maxYear + 2);
+
+        return response()->json([
+            'id' => '1',
+            'data' => $allYears,
+        ]);
+    }
+
     //modal, pengeluaran, pemasukan, laba bersih
     public function laporanSemuaToko(Request $request)
     {
@@ -62,10 +91,6 @@ class DashboardController extends Controller
             'data' => $laporan
         ]);
     }
-
-
-
-
 
     public function laporanPerToko()
     {
@@ -130,6 +155,28 @@ class DashboardController extends Controller
                 ];
             }
 
+            $pendapatanHarian = [];
+
+            for ($i = 0; $i < 7; $i++) {
+                $day = Carbon::now()->startOfWeek(Carbon::MONDAY)->addDays($i);
+                $transaksiHarian = Transaksi::with('items')
+                    ->where('fk_id_toko', $toko->id)
+                    ->whereDate('created_at', $day)
+                    ->get();
+
+                $pendapatanHari = 0;
+
+                foreach ($transaksiHarian as $trx) {
+                    foreach ($trx->items as $item) {
+                        $hargaPokok = $item->product->harga_pokok ?? 0;
+                        $keuntunganPerItem = ($item->harga_jual_product - $hargaPokok) * $item->jumlah_product;
+                        $pendapatanHari += $keuntunganPerItem;
+                    }
+                }
+
+                $pendapatanHarian[] = round($pendapatanHari);
+            }
+
             // Gabungkan ke laporan utama
             $laporan[] = [
                 'nama_toko' => $toko->nama_toko,
@@ -138,7 +185,8 @@ class DashboardController extends Controller
                 'total_pengeluaran' => $totalPengeluaran,
                 'laba_bersih' => $labaBersih,
                 'laba_bersih_bulan_ini' => $labaBersihBulanIni,
-                'laba_bersih_per_tahun' => $labaPerTahun
+                'laba_bersih_per_tahun' => $labaPerTahun,
+                'pendapatan_harian' => $pendapatanHarian,
             ];
         }
 

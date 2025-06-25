@@ -74,6 +74,7 @@ Route::group([
   Route::group([
     'middleware' => 'auth:api'
   ], function () {
+    Route::get('/year', [DashboardController::class, 'getYears']);
     Route::get('/laporan-per-toko', [DashboardController::class, 'laporanPerToko']);
     Route::post('/laporan-tahunan', [DashboardController::class, 'laporanSemuaToko']);
   });
