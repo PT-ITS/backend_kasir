@@ -15,6 +15,11 @@ class CreateTebusMurahsTable extends Migration
     {
         Schema::create('tebus_murahs', function (Blueprint $table) {
             $table->id();
+            $table->string('harga');
+            $table->string('minimal_belanja');
+            $table->date('start');
+            $table->date('end');
+            $table->foreignId('fk_id_product')->constrained('products')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
