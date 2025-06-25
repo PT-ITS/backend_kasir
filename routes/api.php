@@ -11,6 +11,7 @@ use App\Http\Controllers\TokoController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanKeuanganController;
 
 Route::group([
   'prefix' => 'auth'
@@ -77,6 +78,17 @@ Route::group([
     Route::get('/year', [DashboardController::class, 'getYears']);
     Route::get('/laporan-per-toko', [DashboardController::class, 'laporanPerToko']);
     Route::post('/laporan-tahunan', [DashboardController::class, 'laporanSemuaToko']);
+    Route::post('/laporan-tahunan', [LaporanKeuanganController::class, 'laporanSemuaToko']);
+  });
+});
+
+Route::group([
+  'prefix' => 'laporan'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::post('/keuangan', [LaporanKeuanganController::class, 'laporanKeuanganByToko']);
   });
 });
 

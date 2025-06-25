@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
-use App\Models\TransaksiItem;
 use App\Models\Toko;
 use App\Models\BiayaOperasional;
 use Carbon\Carbon;
