@@ -165,6 +165,11 @@ class AuthController extends Controller
      */
     public function logout()
     {
+        LogActivity::create([
+            'level' => auth()->user()->level,
+            'nama' => auth()->user()->name,
+            'keterangan' => 'Logout',
+        ]);
         auth()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);
