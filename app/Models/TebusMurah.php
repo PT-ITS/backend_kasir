@@ -16,4 +16,9 @@ class TebusMurah extends Model
         'end',
         'fk_id_product'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'fk_id_product');
+    }
 }

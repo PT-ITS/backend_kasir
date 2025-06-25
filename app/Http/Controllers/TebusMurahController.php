@@ -13,7 +13,9 @@ class TebusMurahController extends Controller
     public function listTebusMurahByIdToko($id)
     {
         try {
-            $tebusMurah = TebusMurah::where('fk_id_toko', $id)->get();
+            $tebusMurah = TebusMurah::whereHas('product', function ($q) use ($id) {
+                $q->where('fk_id_toko', $id);
+            })->with('product')->get();
 
             return response()->json([
                 'id' => '1',
@@ -31,9 +33,12 @@ class TebusMurahController extends Controller
     public function listTebusMurahByIdTokoWhereActive($id)
     {
         try {
-            $today = Carbon::now()->startOfDay();
-            $tebusMurah = TebusMurah::where('fk_id_toko', $id)
-                ->whereDate('end', '>=', $today)
+            $today = Carbon::today()->toDateString();
+            $tebusMurah = TebusMurah::whereHas('product', function ($q) use ($id) {
+                $q->where('fk_id_toko', $id);
+            })
+                ->where('end', '>', $today)
+                ->with('product')
                 ->get();
 
             return response()->json([
@@ -52,9 +57,11 @@ class TebusMurahController extends Controller
     public function createTebusMurah(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'fk_id_toko' => 'required|integer',
+            'harga' => 'required|string',
+            'minimal_belanja' => 'required|string',
             'start' => 'required|date',
             'end' => 'required|date|after_or_equal:start',
+            'fk_id_product' => 'required|exists:products,id',
         ]);
 
         if ($validator->fails()) {
@@ -67,9 +74,11 @@ class TebusMurahController extends Controller
 
         try {
             $tebusMurah = TebusMurah::create([
-                'fk_id_toko' => $request->fk_id_toko,
+                'harga' => $request->harga,
+                'minimal_belanja' => $request->minimal_belanja,
                 'start' => $request->start,
-                'end' => $request->end
+                'end' => $request->end,
+                'fk_id_product' => $request->fk_id_product
             ]);
 
             return response()->json([
@@ -88,9 +97,11 @@ class TebusMurahController extends Controller
     public function updateTebusMurah(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'fk_id_toko' => 'required|integer',
+            'harga' => 'required|string',
+            'minimal_belanja' => 'required|string',
             'start' => 'required|date',
             'end' => 'required|date|after_or_equal:start',
+            'fk_id_product' => 'required|exists:products,id',
         ]);
 
         if ($validator->fails()) {
@@ -112,9 +123,11 @@ class TebusMurahController extends Controller
             }
 
             $tebusMurah->update([
-                'fk_id_toko' => $request->fk_id_toko,
+                'harga' => $request->harga,
+                'minimal_belanja' => $request->minimal_belanja,
                 'start' => $request->start,
-                'end' => $request->end
+                'end' => $request->end,
+                'fk_id_product' => $request->fk_id_product
             ]);
 
             return response()->json([

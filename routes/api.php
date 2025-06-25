@@ -98,8 +98,8 @@ Route::group([
   Route::group([
     'middleware' => 'auth:api'
   ], function () {
-    Route::get('/list-by-toko', [TebusMurahController::class, 'listTebusMurahByIdToko']);
-    Route::get('/list-where-active', [TebusMurahController::class, 'listTebusMurahByIdTokoWhereActive']);
+    Route::get('/list-by-toko/{id}', [TebusMurahController::class, 'listTebusMurahByIdToko']);
+    Route::get('/list-where-active/{id}', [TebusMurahController::class, 'listTebusMurahByIdTokoWhereActive']);
     Route::post('/create', [TebusMurahController::class, 'createTebusMurah']);
     Route::post('/update/{id}', [TebusMurahController::class, 'updateTebusMurah']);
     Route::delete('/delete/{id}', [TebusMurahController::class, 'deleteTebusMurah']);
