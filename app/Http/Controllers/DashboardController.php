@@ -121,7 +121,8 @@ class DashboardController extends Controller
                     'total_modal' => $modalTahun,
                     'total_pemasukan' => $pemasukanTahun,
                     'total_pengeluaran' => $pengeluaranTahun,
-                    'laba_bersih' => $pemasukanTahun - ($modalTahun + $pengeluaranTahun)
+                    'laba_bersih' => $pemasukanTahun - ($modalTahun + $pengeluaranTahun),
+                    'pajak' => 0.005 * max(0, $pemasukanTahun - ($modalTahun + $pengeluaranTahun))
                 ];
             }
 
