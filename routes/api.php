@@ -12,6 +12,7 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanKeuanganController;
+use App\Http\Controllers\TebusMurahController;
 
 Route::group([
   'prefix' => 'auth'
@@ -88,6 +89,20 @@ Route::group([
     'middleware' => 'auth:api'
   ], function () {
     Route::post('/keuangan', [LaporanKeuanganController::class, 'laporanKeuanganByToko']);
+  });
+});
+
+Route::group([
+  'prefix' => 'tebus-murah'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('/list-by-toko', [TebusMurahController::class, 'listTebusMurahByIdToko']);
+    Route::get('/list-where-active', [TebusMurahController::class, 'listTebusMurahByIdTokoWhereActive']);
+    Route::post('/create', [TebusMurahController::class, 'createTebusMurah']);
+    Route::post('/update/{id}', [TebusMurahController::class, 'updateTebusMurah']);
+    Route::delete('/delete/{id}', [TebusMurahController::class, 'deleteTebusMurah']);
   });
 });
 

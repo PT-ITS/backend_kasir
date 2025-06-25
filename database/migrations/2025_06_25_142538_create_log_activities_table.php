@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTebusMurahsTable extends Migration
+class CreateLogActivitiesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,11 @@ class CreateTebusMurahsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tebus_murahs', function (Blueprint $table) {
+        Schema::create('log_activities', function (Blueprint $table) {
             $table->id();
-            $table->string('harga');
-            $table->string('minimal_belanja');
-            $table->date('start');
-            $table->date('end');
-            $table->foreignId('fk_id_product')->constrained('products')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('level');
+            $table->string('nama');
+            $table->string('keterangan');
             $table->timestamps();
         });
     }
@@ -31,6 +29,6 @@ class CreateTebusMurahsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tebus_murahs');
+        Schema::dropIfExists('log_activities');
     }
 }
