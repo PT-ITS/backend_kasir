@@ -13,6 +13,7 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\TebusMurahController;
+use App\Http\Controllers\LogController;
 
 Route::group([
   'prefix' => 'auth'
@@ -77,6 +78,7 @@ Route::group([
   ], function () {
     Route::get('/laporan-per-toko', [DashboardController::class, 'laporanPerToko']);
     Route::post('/laporan-tahunan', [DashboardController::class, 'laporanSemuaToko']);
+    Route::get('/list-log', [LogController::class, 'listLogActivity']);
   });
 });
 
