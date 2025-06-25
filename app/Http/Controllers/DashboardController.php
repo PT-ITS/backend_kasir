@@ -122,10 +122,9 @@ class DashboardController extends Controller
                     'total_pemasukan' => $pemasukanTahun,
                     'total_pengeluaran' => $pengeluaranTahun,
                     'laba_bersih' => $pemasukanTahun - ($modalTahun + $pengeluaranTahun),
-                    'pajak' => 0.005 * max(0, $pemasukanTahun - ($modalTahun + $pengeluaranTahun))
                 ];
             }
-
+            
             // Gabungkan ke laporan utama
             $laporan[] = [
                 'nama_toko' => $toko->nama_toko,
@@ -134,7 +133,8 @@ class DashboardController extends Controller
                 'total_pengeluaran' => $totalPengeluaran,
                 'laba_bersih' => $labaBersih,
                 'laba_bersih_bulan_ini' => $labaBersihBulanIni,
-                'laba_bersih_per_tahun' => $labaPerTahun
+                'laba_bersih_per_tahun' => $labaPerTahun,
+                'pajak' => 0.005 * max(0, $pemasukanTahun - ($modalTahun + $pengeluaranTahun))
             ];
         }
 
