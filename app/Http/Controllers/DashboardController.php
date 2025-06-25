@@ -82,7 +82,8 @@ class DashboardController extends Controller
             'total_modal' => $m,
             'total_pemasukan' => $p,
             'total_pengeluaran' => $k,
-            'laba_bersih' => $laba
+            'laba_bersih' => $laba,
+            'pajak' => 0.005 * max(0, $p - ($m + $k))
         ];
 
         return response()->json([
@@ -186,7 +187,6 @@ class DashboardController extends Controller
                 'laba_bersih_bulan_ini' => $labaBersihBulanIni,
                 'laba_bersih_per_tahun' => $labaPerTahun,
                 'pendapatan_harian' => $pendapatanHarian,
-                'pajak' => 0.005 * max(0, $pemasukanTahun - ($modalTahun + $pengeluaranTahun))
             ];
         }
 
