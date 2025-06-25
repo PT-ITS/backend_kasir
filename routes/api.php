@@ -76,7 +76,6 @@ Route::group([
   ], function () {
     Route::get('/laporan-per-toko', [DashboardController::class, 'laporanPerToko']);
     Route::post('/laporan-tahunan', [DashboardController::class, 'laporanSemuaToko']);
-    Route::post('/laporan-tahunan', [LaporanKeuanganController::class, 'laporanSemuaToko']);
   });
 });
 
