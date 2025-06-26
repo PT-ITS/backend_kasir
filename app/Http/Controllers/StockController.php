@@ -64,7 +64,7 @@ class StockController extends Controller
 
 
             LogActivity::create([
-                'level' => auth()->user()->name,
+                'level' => auth()->user()->level,
                 'nama' => auth()->user()->name,
                 'keterangan' => 'Menambahkan stock',
             ]);

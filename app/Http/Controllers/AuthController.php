@@ -99,7 +99,7 @@ class AuthController extends Controller
             'status' => $user->status,
         ];
 
-
+        JWTAuth::factory()->setTTL(1440);
         $tokenWithClaims = JWTAuth::claims($customClaims)->fromUser($user);
         $user->active_token = $tokenWithClaims;
         $user->save();
@@ -243,18 +243,38 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
-        $idToko = Kasir::where('fk_id_user', auth()->user()->id)->first()->fk_id_toko ?? '';
+        $user = auth()->user();
+        $ttlMinutes = auth()->factory()->getTTL(); // Should return 1440 if set as shown before
+        $idToko = Kasir::where('fk_id_user', $user->id)->first()->fk_id_toko ?? '';
+
         return response()->json([
             'access_token' => $token,
-            'sub' => auth()->user()->id,
-            'name' => auth()->user()->name,
-            'email' => auth()->user()->email,
-            'level' => auth()->user()->level,
-            'status' => auth()->user()->status,
+            'sub' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'level' => $user->level,
+            'status' => $user->status,
             'id_toko' => $idToko,
             'iat' => now()->timestamp,
+            'exp' => now()->addMinutes($ttlMinutes)->timestamp,
             'token_type' => 'bearer',
-            'expires_in' =>  auth()->factory()->getTTL() * 60,
+            'expires_in' => $ttlMinutes * 60, // in seconds
         ]);
     }
+    // protected function respondWithToken($token)
+    // {
+    //     $idToko = Kasir::where('fk_id_user', auth()->user()->id)->first()->fk_id_toko ?? '';
+    //     return response()->json([
+    //         'access_token' => $token,
+    //         'sub' => auth()->user()->id,
+    //         'name' => auth()->user()->name,
+    //         'email' => auth()->user()->email,
+    //         'level' => auth()->user()->level,
+    //         'status' => auth()->user()->status,
+    //         'id_toko' => $idToko,
+    //         'iat' => now()->timestamp,
+    //         'token_type' => 'bearer',
+    //         'expires_in' =>  auth()->factory()->getTTL() * 60,
+    //     ]);
+    // }
 }
