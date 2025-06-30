@@ -112,11 +112,13 @@ class AuthController extends Controller
                 'keterangan' => 'Login',
             ]);
         }
-        ActivityManager::create([
-            'name' => $user->name,
-            'activity' => 'Login',
-            'deskripsi' => 'Manager login kedalam aplikasi',
-        ]);
+        if ($user->level == '1') {
+            ActivityManager::create([
+                'name' => $user->name,
+                'activity' => 'Login',
+                'deskripsi' => 'Manager login kedalam aplikasi',
+            ]);
+        }
         return $this->respondWithToken($tokenWithClaims);
     }
 
@@ -179,11 +181,13 @@ class AuthController extends Controller
                 'keterangan' => 'Logout',
             ]);
         }
-        ActivityManager::create([
-            'name' => auth()->user()->name,
-            'activity' => 'Logout',
-            'deskripsi' => 'Manager logout dari aplikasi',
-        ]);
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Logout',
+                'deskripsi' => 'Manager logout dari aplikasi',
+            ]);
+        }
 
         auth()->logout();
 
