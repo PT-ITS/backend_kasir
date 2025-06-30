@@ -45,6 +45,7 @@ class DashboardController extends Controller
     //modal, pengeluaran, pemasukan, laba bersih
     public function laporanSemuaToko(Request $request)
     {
+        $user = auth()->user();
 
         $filterTahun = $request->input('tahun');
         if (!$filterTahun) {
@@ -54,50 +55,88 @@ class DashboardController extends Controller
             ], 400);
         }
 
-        // Pastikan tahun jadi string
         $tahunStr = (string) $filterTahun;
 
-        // Query modal
-        $modal = TambahStock::selectRaw('YEAR(created_at) as tahun, SUM(jumlah * harga_beli) as total_modal')
+        // Ambil daftar ID toko sesuai level
+        if ($user->level == 0) {
+            // Owner
+            $idTokoList = Toko::pluck('id');
+        } elseif ($user->level == 1) {
+            // Manager
+            $idTokoList = Toko::where('fk_id_manager', $user->id)->pluck('id');
+
+            // Kalau manager tidak punya toko
+            if ($idTokoList->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'tahun' => (int)$tahunStr,
+                        'total_modal' => 0,
+                        'total_hpp' => 0,
+                        'total_omset' => 0,
+                        'total_pemasukan' => 0,
+                        'total_pengeluaran' => 0,
+                        'laba_bersih' => 0,
+                        'pajak' => 0
+                    ]
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        // ===== Query berdasarkan toko yg sesuai =====
+
+        // Total Modal (stok masuk)
+        $modal = TambahStock::whereHas('catatanStock', function ($query) use ($idTokoList) {
+            $query->whereIn('fk_id_toko', $idTokoList);
+        })
             ->whereYear('created_at', $tahunStr)
+            ->selectRaw('YEAR(created_at) as tahun, SUM(jumlah * harga_beli) as total_modal')
             ->groupBy('tahun')
             ->pluck('total_modal', 'tahun');
 
-        // Query hpp
-        $hpp = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_hpp')
+        // HPP (harga pokok penjualan)
+        $hpp = Transaksi::whereIn('fk_id_toko', $idTokoList)
             ->whereYear('created_at', $tahunStr)
+            ->selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_hpp')
             ->groupBy('tahun')
             ->pluck('total_hpp', 'tahun');
 
-        // Query pemasukan
-        $pemasukan = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_bayar) as total_pemasukan')
+        // Omset / Pemasukan kotor
+        $pemasukan = Transaksi::whereIn('fk_id_toko', $idTokoList)
             ->whereYear('created_at', $tahunStr)
+            ->selectRaw('YEAR(created_at) as tahun, SUM(total_bayar) as total_pemasukan')
             ->groupBy('tahun')
             ->pluck('total_pemasukan', 'tahun');
 
-        // Query pengeluaran
-        $pengeluaran = BiayaOperasional::selectRaw('YEAR(created_at) as tahun, SUM(jumlah_biaya) as total_pengeluaran')
+        // Pengeluaran Operasional
+        $pengeluaran = BiayaOperasional::whereIn('fk_id_toko', $idTokoList)
             ->whereYear('created_at', $tahunStr)
+            ->selectRaw('YEAR(created_at) as tahun, SUM(jumlah_biaya) as total_pengeluaran')
             ->groupBy('tahun')
             ->pluck('total_pengeluaran', 'tahun');
 
-        // Ambil data hanya tahun filter
-        $m = $modal[$tahunStr] ?? 0;   // Total modal (stok masuk)
-        $hpp = $hpp[$tahunStr] ?? 0;   // Harga pokok penjualan
-        $o = $pemasukan[$tahunStr] ?? 0; // Omset
-        $p = $o - $hpp;                // Pemasukan bersih (laba kotor)
-        $k = $pengeluaran[$tahunStr] ?? 0; // Pengeluaran operasional
-        $laba = $p - $k;               // Laba bersih
+        // Ambil angka hanya utk tahun yg diminta
+        $m = $modal[$tahunStr] ?? 0;
+        $h = $hpp[$tahunStr] ?? 0;
+        $o = $pemasukan[$tahunStr] ?? 0;
+        $p = $o - $h;
+        $k = $pengeluaran[$tahunStr] ?? 0;
+        $laba = $p - $k;
 
         $laporan = [
             'tahun' => (int)$tahunStr,
             'total_modal' => $m,
-            'total_hpp' => $hpp,
+            'total_hpp' => $h,
             'total_omset' => $o,
             'total_pemasukan' => $p,
             'total_pengeluaran' => $k,
             'laba_bersih' => $laba,
-            'pajak' => 0.12 * max(0, $laba)
+            'pajak' => round(0.12 * max(0, $laba))
         ];
 
         return response()->json([
@@ -108,7 +147,19 @@ class DashboardController extends Controller
 
     public function laporanPerToko()
     {
-        $tokoList = Toko::all();
+        if (auth()->user()->level == 0) {
+            // Owner: ambil semua toko
+            $tokoList = Toko::all();
+        } elseif (auth()->user()->level == 1) {
+            // Manager: hanya toko yang dia kelola
+            $tokoList = Toko::where('fk_id_manager', auth()->user()->id)->get();
+        } else {
+            return response()->json([
+                'id' => '0',
+                'message' => 'Unauthorized access',
+                'data' => []
+            ], 403);
+        }
         $laporan = [];
 
         foreach ($tokoList as $toko) {

@@ -81,6 +81,8 @@ class ManagerController extends Controller
                     'name' => $validateData['name'],
                     'email' => $validateData['email'],
                     'password' => bcrypt($validateData['password']),
+                    'level' => '1',
+                    'status' => '1',
                 ]);
 
                 Manager::create([

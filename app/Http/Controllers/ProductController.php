@@ -42,8 +42,8 @@ class ProductController extends Controller
                 'deskripsi' => 'Manager melihat detail toko',
             ]);
         }
-        $today = Carbon::today();
 
+        $today = Carbon::today();
         $toko = Toko::find($id);
 
         // Ambil semua produk berdasarkan ID toko
@@ -58,10 +58,22 @@ class ProductController extends Controller
         // Ambil semua ID produk untuk pengecekan expired
         $productIds = $products->pluck('id');
 
-        // Hitung produk yang memiliki stok expired
-        $jumlahProdukExpired = TambahStock::whereIn('fk_id_product', $productIds)
-            ->whereDate('expired', '<', $today)
-            ->count();
+        // Ambil semua tambah_stocks yang relevan
+        $tambahStocks = TambahStock::whereIn('fk_id_product', $productIds)
+            ->orderBy('expired', 'asc')
+            ->get()
+            ->groupBy('fk_id_product');
+
+        $jumlahProdukExpired = 0;
+
+        foreach ($tambahStocks as $productId => $stocks) {
+            // Ambil expired terdekat dari hari ini (boleh lewat hari ini sedikit atau belum lewat)
+            $expiredTerdekat = $stocks->first();
+
+            if ($expiredTerdekat && Carbon::parse($expiredTerdekat->expired)->lt($today)) {
+                $jumlahProdukExpired++;
+            }
+        }
 
         return response()->json([
             'id' => $id,
@@ -217,6 +229,8 @@ class ProductController extends Controller
             'satuan' => 'required',
             'jenis' => 'required',
             'merek' => 'required',
+            'harga_grosir' => 'required',
+            'sk_grosir' => 'required',
         ]);
 
 
@@ -244,6 +258,8 @@ class ProductController extends Controller
         $products->satuan = $validateData['satuan'];
         $products->jenis = $validateData['jenis'];
         $products->merek = $validateData['merek'];
+        $products->harga_grosir = $validateData['harga_grosir'];
+        $products->sk_grosir = $validateData['sk_grosir'];
         $products->save();
 
         if (auth()->user()->level == '1') {

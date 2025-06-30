@@ -178,7 +178,6 @@ class AuthController extends Controller
                 'nama' => auth()->user()->name,
                 'keterangan' => 'Logout',
             ]);
-            auth()->logout();
         }
         ActivityManager::create([
             'name' => auth()->user()->name,

@@ -35,7 +35,7 @@ class TransaksiController extends Controller
             return response()->json(['success' => false, 'message' => 'Transaksi tidak ditemukan'], 404);
         }
 
-         if (auth()->user()->level == '1') {
+        if (auth()->user()->level == '1') {
             ActivityManager::create([
                 'name' => auth()->user()->name,
                 'activity' => 'Transaksi',
@@ -104,25 +104,49 @@ class TransaksiController extends Controller
         }
     }
 
-    public function delete($id)
+    public function deleteTransaksi($id)
     {
+        DB::beginTransaction();
+
         try {
-            $datas = Transaksi::find($id);
-            if ($datas) {
-                $datas->delete();
-                return response()->json([
-                    'id' => '1',
-                    'message' => 'success',
-                    'data' => $datas
-                ]);
-            } else {
+            $transaksi = Transaksi::find($id);
+
+            if (!$transaksi) {
                 return response()->json([
                     'id' => '0',
                     'message' => 'data not found',
                     'data' => []
                 ]);
             }
+
+            // Ambil semua item dalam transaksi
+            $items = TransaksiItem::where('fk_id_transaksi', $id)->get();
+
+            // Kembalikan stok produk
+            foreach ($items as $item) {
+                $product = Product::find($item->fk_id_product);
+                if ($product) {
+                    $product->stock_product += $item->jumlah_product;
+                    $product->save();
+                }
+            }
+
+            // Hapus transaksi item
+            TransaksiItem::where('fk_id_transaksi', $id)->delete();
+
+            // Hapus transaksi
+            $transaksi->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'id' => '1',
+                'message' => 'Transaksi dan stok berhasil dihapus dan dikembalikan.',
+                'data' => $transaksi
+            ]);
         } catch (\Throwable $th) {
+            DB::rollBack();
+
             return response()->json([
                 'id' => '0',
                 'message' => $th->getMessage(),

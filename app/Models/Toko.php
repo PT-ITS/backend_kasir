@@ -16,4 +16,9 @@ class Toko extends Model
         'alamat_toko',
         'fk_id_manager',
     ];
+
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'fk_id_manager');
+    }
 }

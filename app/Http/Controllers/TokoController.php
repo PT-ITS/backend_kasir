@@ -20,7 +20,19 @@ class TokoController extends Controller
     public function list()
     {
         try {
-            $datas = Toko::all();
+            if (auth()->user()->level == 0) {
+                // Owner: ambil semua toko
+                $datas = Toko::with('manager')->get();
+            } elseif (auth()->user()->level == 1) {
+                // Manager: hanya toko yang dia kelola
+                $datas = Toko::with('manager')->where('fk_id_manager', auth()->user()->id)->get();
+            } else {
+                return response()->json([
+                    'id' => '0',
+                    'message' => 'Unauthorized access',
+                    'data' => []
+                ], 403);
+            }
             if (!$datas) {
                 return response()->json([
                     'id' => '0',
@@ -84,7 +96,19 @@ class TokoController extends Controller
 
     public function jumlahProduk()
     {
-        $tokos = Toko::all();
+        if (auth()->user()->level == 0) {
+            // Owner: ambil semua toko
+            $tokos = Toko::all();
+        } elseif (auth()->user()->level == 1) {
+            // Manager: hanya toko yang dia kelola
+            $tokos = Toko::where('fk_id_manager', auth()->user()->id)->get();
+        } else {
+            return response()->json([
+                'id' => '0',
+                'message' => 'Unauthorized access',
+                'data' => []
+            ], 403);
+        }
         $results = [];
 
         foreach ($tokos as $toko) {
@@ -98,12 +122,12 @@ class TokoController extends Controller
         }
 
         if (auth()->user()->level == '1') {
-                ActivityManager::create([
-                    'name' => auth()->user()->name,
-                    'activity' => 'Toko',
-                    'deskripsi' => 'Manager melihat jumlah produk di setiap toko',
-                ]);
-            }
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Toko',
+                'deskripsi' => 'Manager melihat jumlah produk di setiap toko',
+            ]);
+        }
 
         return response()->json($results);
     }
@@ -153,7 +177,19 @@ class TokoController extends Controller
 
         $results = [];
 
-        $tokos = Toko::all();
+        if (auth()->user()->level == 0) {
+            // Owner: ambil semua toko
+            $tokos = Toko::all();
+        } elseif (auth()->user()->level == 1) {
+            // Manager: hanya toko yang dia kelola
+            $tokos = Toko::where('fk_id_manager', auth()->user()->id)->get();
+        } else {
+            return response()->json([
+                'id' => '0',
+                'message' => 'Unauthorized access',
+                'data' => []
+            ], 403);
+        }
 
         foreach ($tokos as $toko) {
             $transaksiHariIni = Transaksi::with('items')
@@ -233,12 +269,12 @@ class TokoController extends Controller
         }
 
         if (auth()->user()->level == '1') {
-                ActivityManager::create([
-                    'name' => auth()->user()->name,
-                    'activity' => 'Toko',
-                    'deskripsi' => 'Manager melihat list transaksi per toko',
-                ]);
-            }
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Toko',
+                'deskripsi' => 'Manager melihat list transaksi per toko',
+            ]);
+        }
 
         return response()->json([
             'id' => '1',
@@ -251,15 +287,27 @@ class TokoController extends Controller
     {
         $today = Carbon::today();
 
-        $toko = Toko::findOrFail($id);
+        if (auth()->user()->level == 0) {
+            // Owner: ambil semua toko
+            $toko = Toko::findOrFail($id);
+        } elseif (auth()->user()->level == 1) {
+            // Manager: hanya toko yang dia kelola
+            $toko = Toko::where('fk_id_manager', auth()->user()->id)->findOrFail($id);
+        } else {
+            return response()->json([
+                'id' => '0',
+                'message' => 'Unauthorized access',
+                'data' => []
+            ], 403);
+        }
 
         if (auth()->user()->level == '1') {
-                ActivityManager::create([
-                    'name' => auth()->user()->name,
-                    'activity' => 'Toko',
-                    'deskripsi' => 'Manager melihat detail transaksi di toko',
-                ]);
-            }
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Toko',
+                'deskripsi' => 'Manager melihat detail transaksi di toko',
+            ]);
+        }
 
         // Get today's transactions for this toko
         $transaksiHariIni = Transaksi::with(['items' => function ($query) {

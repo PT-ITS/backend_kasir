@@ -13,7 +13,8 @@ class KasirController extends Controller
     {
         try {
             $datas = User::join('kasirs', 'users.id', '=', 'kasirs.fk_id_user')
-                ->select('users.*', 'kasirs.nama_kasir', 'kasirs.hp_kasir', 'kasirs.alamat_kasir', 'kasirs.fk_id_toko')
+                ->join('tokos', 'kasirs.fk_id_toko', '=', 'tokos.id')
+                ->select('users.*', 'kasirs.nama_kasir', 'kasirs.hp_kasir', 'kasirs.alamat_kasir', 'kasirs.fk_id_toko', 'tokos.nama_toko')
                 ->get();
             if (!$datas) {
                 return response()->json([
@@ -40,8 +41,9 @@ class KasirController extends Controller
     {
         try {
             $datas = User::join('kasirs', 'users.id', '=', 'kasirs.fk_id_user')
+                ->join('tokos', 'kasirs.fk_id_toko', '=', 'tokos.id')
                 ->where('kasirs.fk_id_toko', $id)
-                ->select('users.*', 'kasirs.nama_kasir', 'kasirs.hp_kasir', 'kasirs.alamat_kasir', 'kasirs.fk_id_toko')
+                ->select('users.*', 'kasirs.nama_kasir', 'kasirs.hp_kasir', 'kasirs.alamat_kasir', 'kasirs.fk_id_toko', 'tokos.nama_toko')
                 ->get();
             if (!$datas) {
                 return response()->json([
@@ -110,6 +112,8 @@ class KasirController extends Controller
                     'name' => $validateData['name'],
                     'email' => $validateData['email'],
                     'password' => bcrypt($validateData['password']),
+                    'level' => '2',
+                    'status' => '1',
                 ]);
 
                 Kasir::create([
