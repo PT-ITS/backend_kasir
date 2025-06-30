@@ -7,8 +7,10 @@ use App\Models\Transaksi;
 use App\Models\Toko;
 use App\Models\BiayaOperasional;
 use App\Models\TambahStock;
+use App\Models\ActivityManager;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+
 
 class DashboardController extends Controller
 {
@@ -43,6 +45,7 @@ class DashboardController extends Controller
     //modal, pengeluaran, pemasukan, laba bersih
     public function laporanSemuaToko(Request $request)
     {
+
         $filterTahun = $request->input('tahun');
         if (!$filterTahun) {
             return response()->json([

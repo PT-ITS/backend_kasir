@@ -11,12 +11,20 @@ use App\Models\TambahStock;
 use App\Models\Toko;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
+use App\Models\ActivityManager;
 use Carbon\Carbon;
 
 class ProductController extends Controller
 {
     public function listProductByToko()
     {
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Product',
+                'deskripsi' => 'Manager melihat list product yang ada di toko',
+            ]);
+        }
         $idToko = Kasir::where('fk_id_user', auth()->user()->id)->first();
         $products = Product::where('fk_id_toko', $idToko->fk_id_toko)->get();
         return response()->json([
@@ -27,6 +35,13 @@ class ProductController extends Controller
 
     public function listProductByIdToko($id)
     {
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Product',
+                'deskripsi' => 'Manager melihat detail toko',
+            ]);
+        }
         $today = Carbon::today();
 
         $toko = Toko::find($id);
@@ -126,6 +141,13 @@ class ProductController extends Controller
     public function createNewProduct(Request $request)
     {
         try {
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Product',
+                    'deskripsi' => 'Manager menambahkan product baru',
+                ]);
+            }
             $validateData = $request->validate([
                 'kode_product' => 'required',
                 'nama_product' => 'required',
@@ -167,6 +189,13 @@ class ProductController extends Controller
     public function detailProduct($id)
     {
         $products = Product::find($id);
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Product',
+                'deskripsi' => 'Manager melihat detail product',
+            ]);
+        }
         if (!$products) {
             return response()->json([
                 'id' => '0',
@@ -189,6 +218,8 @@ class ProductController extends Controller
             'jenis' => 'required',
             'merek' => 'required',
         ]);
+
+
 
         $levelUser = User::find(auth()->user()->id)->level ?? '';
 
@@ -215,6 +246,14 @@ class ProductController extends Controller
         $products->merek = $validateData['merek'];
         $products->save();
 
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Product',
+                'deskripsi' => 'Manager mengupdate harga product' . $products->nama_product . ' menjadi ' . $validateData['harga_jual'],
+            ]);
+        }
+
         return response()->json([
             'id' => '1',
             'data' => 'harga product berhasil di update'
@@ -239,6 +278,14 @@ class ProductController extends Controller
 
 
             Product::find($validateData['id_product'])->delete();
+
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Product',
+                    'deskripsi' => 'Manager menghapus product',
+                ]);
+            }
             return response()->json([
                 'id' => '1',
                 'data' => 'product berhasil di delete'
@@ -269,6 +316,14 @@ class ProductController extends Controller
                     ->orWhere('barcode', 'like', '%' . $query . '%');
             })
             ->get();
+
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Product',
+                'deskripsi' => 'Manager mencari product product',
+            ]);
+        }
 
         return response()->json([
             'success' => true,

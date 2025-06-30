@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use App\Models\CatatanStock;
 use App\Models\BiayaOperasional;
+use App\Models\ActivityManager;
 use Carbon\Carbon;
 
 class LaporanKeuanganController extends Controller
@@ -22,6 +23,14 @@ class LaporanKeuanganController extends Controller
                 'id' => '0',
                 'message' => 'Parameter toko_id, tahun, dan bulan wajib diisi.'
             ], 400);
+        }
+
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Laporan Keuangan',
+                'deskripsi' => 'Manager melihat laporan keluangan per toko',
+            ]);
         }
 
         // Rentang tanggal lengkap (dengan waktu)

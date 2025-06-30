@@ -5,11 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Imports\ProductImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\ActivityManager;
 
 class ProductImportController extends Controller
 {
     public function import(Request $request)
     {
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Import Product',
+                'deskripsi' => 'Manager melakukan import product',
+            ]);
+        }
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv',
         ]);

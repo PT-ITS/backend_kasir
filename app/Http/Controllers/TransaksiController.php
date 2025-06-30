@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
+use App\Models\ActivityManager;
 use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
@@ -13,6 +14,13 @@ class TransaksiController extends Controller
     public function listTransaksiByToko($id)
     {
         $transaksi = Transaksi::where('fk_id_toko', $id)->get();
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Transaksi',
+                'deskripsi' => 'Manager melihat list transaksi di toko',
+            ]);
+        }
         return response()->json([
             'success' => true,
             'data' => $transaksi
@@ -25,6 +33,14 @@ class TransaksiController extends Controller
 
         if (!$transaksi) {
             return response()->json(['success' => false, 'message' => 'Transaksi tidak ditemukan'], 404);
+        }
+
+         if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Transaksi',
+                'deskripsi' => 'Manager melihat detail transaksi di toko',
+            ]);
         }
 
         return response()->json([
