@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\Kasir;
 use App\Models\LogActivity;
+use App\Models\ActivityManager;
 use DateTimeZone;
 use DateTime;
 use App\Mail\EmailVerification;
@@ -109,13 +110,17 @@ class AuthController extends Controller
             'nama' => $user->name,
             'keterangan' => 'Login',
         ]);
+        ActivityManager::create([
+            'name' => $user->name,
+            'activity' => 'Login',
+            'deskripsi' => 'Manager login kedalam aplikasi',
+        ]);
         return $this->respondWithToken($tokenWithClaims);
     }
 
     public function listUser()
     {
         $users = User::get();
-
         return response()->json([
             'data' => $users,
             'message' => 'successfully'
@@ -165,6 +170,12 @@ class AuthController extends Controller
      */
     public function logout()
     {
+        ActivityManager::create([
+            'name' => auth()->user()->name,
+            'activity' => 'Logout',
+            'deskripsi' => 'Manager logout dari aplikasi',
+        ]);
+
         auth()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);

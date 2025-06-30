@@ -6,6 +6,7 @@ use App\Models\CatatanStock;
 use App\Models\TambahStock;
 use App\Models\Product;
 use App\Models\LogActivity;
+use App\Models\ActivityManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -66,6 +67,13 @@ class StockController extends Controller
                 'nama' => auth()->user()->name,
                 'keterangan' => 'Menambahkan stock',
             ]);
+            if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Stock',
+                'deskripsi' => 'Manager melakukan belanja stock',
+            ]);
+        }
             DB::commit();
 
             return response()->json([
@@ -89,6 +97,14 @@ class StockController extends Controller
             ->where('fk_id_product', $id)
             ->get();
 
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Stock',
+                'deskripsi' => 'Manager melihat catatan stock product',
+            ]);
+        }
+
         $result = $stocks->map(function ($item) {
             return [
                 'tanggal' => optional($item->catatanStock)->tanggal_belanja ?? '-',
@@ -111,6 +127,14 @@ class StockController extends Controller
         })
             ->with(['tambahStocks.product'])
             ->get();
+
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Stock',
+                'deskripsi' => 'Manager melihat list stock yang ada di toko',
+            ]);
+        }
         return response()->json([
             'id' => '1',
             'message' => 'Success',
@@ -128,6 +152,13 @@ class StockController extends Controller
         $catatan->tambahStocks()->delete(); // delete details first
         $catatan->delete();
 
+        if (auth()->user()->level == '1') {
+            ActivityManager::create([
+                'name' => auth()->user()->name,
+                'activity' => 'Stock',
+                'deskripsi' => 'Manager menghapus catatan stock',
+            ]);
+        }
         return response()->json([
             'id' => '1',
             'message' => 'Data deleted',

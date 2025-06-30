@@ -4,12 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\BiayaOperasional;
+use App\Models\ActivityManager;
 
 class BiayaOperasionalController extends Controller
 {
     public function list()
     {
         try {
+
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Biaya Operasional',
+                    'deskripsi' => 'Manager melihat list biaya operasional',
+                ]);
+            }
             $datas = BiayaOperasional::join('tokos', 'biaya_operasionals.fk_id_toko', '=', 'tokos.id')
                 ->select('biaya_operasionals.*', 'tokos.nama_toko')
                 ->get();
@@ -37,6 +46,13 @@ class BiayaOperasionalController extends Controller
     public function detail($id)
     {
         try {
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Biaya Operasional',
+                    'deskripsi' => 'Manager melihat detail biaya operasional',
+                ]);
+            }
             $datas = BiayaOperasional::join('tokos', 'biaya_operasionals.fk_id_toko', '=', 'tokos.id')
                 ->select('biaya_operasionals.*', 'tokos.nama_toko')
                 ->where('id', $id)
@@ -81,6 +97,14 @@ class BiayaOperasionalController extends Controller
                 'fk_id_toko' => $validateData['fk_id_toko'],
             ]);
 
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Biaya Operasional',
+                    'deskripsi' => 'Manager menambah biaya operasional' . $validateData['nama_operasional'],
+                ]);
+            }
+
             return response()->json([
                 'id' => '1',
                 'message' => 'success',
@@ -120,6 +144,14 @@ class BiayaOperasionalController extends Controller
             $datas->fk_id_toko = $validateData['fk_id_toko'];
             $datas->save();
 
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Biaya Operasional',
+                    'deskripsi' => 'Manager mengupdate biaya operasional' . $validateData['nama_operasional'],
+                ]);
+            }
+
             return response()->json([
                 'id' => '1',
                 'message' => 'success',
@@ -139,6 +171,14 @@ class BiayaOperasionalController extends Controller
             $datas = BiayaOperasional::find($id);
             if ($datas) {
                 $datas->delete();
+
+                if (auth()->user()->level == '1') {
+                    ActivityManager::create([
+                        'name' => auth()->user()->name,
+                        'activity' => 'Biaya Operasional',
+                        'deskripsi' => 'Manager menghapus biaya operasional',
+                    ]);
+                }
                 return response()->json([
                     'id' => '1',
                     'message' => 'success',

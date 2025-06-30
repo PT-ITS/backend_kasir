@@ -9,6 +9,7 @@ use App\Models\TransaksiItem;
 use App\Models\Product;
 use App\Models\CatatanStock;
 use App\Models\TambahStock;
+use App\Models\ActivityManager;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use DB;
@@ -24,6 +25,14 @@ class TokoController extends Controller
                     'id' => '0',
                     'message' => 'data not found',
                     'data' => []
+                ]);
+            }
+
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Toko',
+                    'deskripsi' => 'Manager melihat list toko',
                 ]);
             }
             return response()->json([
@@ -49,6 +58,13 @@ class TokoController extends Controller
                     'id' => '0',
                     'message' => 'data not found',
                     'data' => []
+                ]);
+            }
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Toko',
+                    'deskripsi' => 'Manager melihat list toko yang ada dibawah tanggung jawabnya',
                 ]);
             }
             return response()->json([
@@ -79,6 +95,14 @@ class TokoController extends Controller
                 'jumlah_produk' => $jumlahProduk
             ];
         }
+
+        if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Toko',
+                    'deskripsi' => 'Manager melihat jumlah produk di setiap toko',
+                ]);
+            }
 
         return response()->json($results);
     }
@@ -209,6 +233,14 @@ class TokoController extends Controller
             ];
         }
 
+        if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Toko',
+                    'deskripsi' => 'Manager melihat list transaksi per toko',
+                ]);
+            }
+
         return response()->json([
             'id' => '1',
             'message' => 'data found',
@@ -221,6 +253,14 @@ class TokoController extends Controller
         $today = Carbon::today();
 
         $toko = Toko::findOrFail($id);
+
+        if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Toko',
+                    'deskripsi' => 'Manager melihat detail transaksi di toko',
+                ]);
+            }
 
         // Get today's transactions for this toko
         $transaksiHariIni = Transaksi::with(['items' => function ($query) {

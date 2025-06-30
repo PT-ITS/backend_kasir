@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TebusMurah;
+use App\Models\ActivityManager;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -14,6 +15,13 @@ class TebusMurahController extends Controller
     {
         try {
             $tebusMurah = TebusMurah::where('fk_id_toko', $id)->get();
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Tebus Murah',
+                    'deskripsi' => 'Manager melihat list tebus murah yang ada di toko',
+                ]);
+            }
 
             return response()->json([
                 'id' => '1',
@@ -35,6 +43,14 @@ class TebusMurahController extends Controller
             $tebusMurah = TebusMurah::where('fk_id_toko', $id)
                 ->whereDate('end', '>=', $today)
                 ->get();
+
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Tebus Murah',
+                    'deskripsi' => 'Manager melihat list tebus murah yang ada di toko dan masih aktif',
+                ]);
+            }
 
             return response()->json([
                 'id' => '1',
@@ -71,6 +87,14 @@ class TebusMurahController extends Controller
                 'start' => $request->start,
                 'end' => $request->end
             ]);
+
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Tebus Murah',
+                    'deskripsi' => 'Manager membuat tebus murah baru',
+                ]);
+            }
 
             return response()->json([
                 'id' => '1',
@@ -117,6 +141,14 @@ class TebusMurahController extends Controller
                 'end' => $request->end
             ]);
 
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Tebus Murah',
+                    'deskripsi' => 'Manager melakukan update tebus murah',
+                ]);
+            }
+
             return response()->json([
                 'id' => '1',
                 'data' => $tebusMurah
@@ -143,6 +175,14 @@ class TebusMurahController extends Controller
             }
 
             $tebusMurah->delete();
+
+            if (auth()->user()->level == '1') {
+                ActivityManager::create([
+                    'name' => auth()->user()->name,
+                    'activity' => 'Tebus Murah',
+                    'deskripsi' => 'Manager menghapus tebus murah',
+                ]);
+            }
 
             return response()->json([
                 'id' => '1',

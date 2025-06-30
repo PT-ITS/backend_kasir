@@ -79,6 +79,7 @@ Route::group([
     Route::get('/laporan-per-toko', [DashboardController::class, 'laporanPerToko']);
     Route::post('/laporan-tahunan', [DashboardController::class, 'laporanSemuaToko']);
     Route::get('/list-log', [LogController::class, 'listLogActivity']);
+    Route::get('/monitoring-manager', [LogController::class, 'monitoringManager']);
   });
 });
 
