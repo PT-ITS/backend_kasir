@@ -179,5 +179,6 @@ Route::group([
   Route::get('/list', [TransaksiController::class, 'listTransaksiByToko']);
   Route::get('/detail/{id}', [TransaksiController::class, 'detailTransaksi']);
   Route::post('/create', [TransaksiController::class, 'createTransaksi']);
+  Route::delete('/delete/{id}', [TransaksiController::class, 'deleteTransaksi']);
   // });
 });

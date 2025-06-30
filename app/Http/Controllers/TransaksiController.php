@@ -87,4 +87,31 @@ class TransaksiController extends Controller
             ], 500);
         }
     }
+
+    public function delete($id)
+    {
+        try {
+            $datas = Transaksi::find($id);
+            if ($datas) {
+                $datas->delete();
+                return response()->json([
+                    'id' => '1',
+                    'message' => 'success',
+                    'data' => $datas
+                ]);
+            } else {
+                return response()->json([
+                    'id' => '0',
+                    'message' => 'data not found',
+                    'data' => []
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'message' => $th->getMessage(),
+                'data' => []
+            ]);
+        }
+    }
 }

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use App\Models\Toko;
 use App\Models\BiayaOperasional;
+use App\Models\TambahStock;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -54,21 +55,22 @@ class DashboardController extends Controller
         $tahunStr = (string) $filterTahun;
 
         // Query modal
-        $modal = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_modal')
+        $modal = TambahStock::selectRaw('YEAR(created_at) as tahun, SUM(jumlah * harga_beli) as total_modal')
             ->whereYear('created_at', $tahunStr)
             ->groupBy('tahun')
             ->pluck('total_modal', 'tahun');
+
+        // Query hpp
+        $hpp = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_hpp')
+            ->whereYear('created_at', $tahunStr)
+            ->groupBy('tahun')
+            ->pluck('total_hpp', 'tahun');
 
         // Query pemasukan
         $pemasukan = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_bayar) as total_pemasukan')
             ->whereYear('created_at', $tahunStr)
             ->groupBy('tahun')
             ->pluck('total_pemasukan', 'tahun');
-
-        $modal = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_modal')
-            ->whereYear('created_at', $tahunStr)
-            ->groupBy('tahun')
-            ->pluck('total_modal', 'tahun');
 
         // Query pengeluaran
         $pengeluaran = BiayaOperasional::selectRaw('YEAR(created_at) as tahun, SUM(jumlah_biaya) as total_pengeluaran')
@@ -77,18 +79,22 @@ class DashboardController extends Controller
             ->pluck('total_pengeluaran', 'tahun');
 
         // Ambil data hanya tahun filter
-        $m = $modal[$tahunStr] ?? 0;
-        $p = $pemasukan[$tahunStr] - $modal[$tahunStr] ?? 0;
-        $k = $pengeluaran[$tahunStr] ?? 0;
-        $laba = $p - $k;
+        $m = $modal[$tahunStr] ?? 0;   // Total modal (stok masuk)
+        $hpp = $hpp[$tahunStr] ?? 0;   // Harga pokok penjualan
+        $o = $pemasukan[$tahunStr] ?? 0; // Omset
+        $p = $o - $hpp;                // Pemasukan bersih (laba kotor)
+        $k = $pengeluaran[$tahunStr] ?? 0; // Pengeluaran operasional
+        $laba = $p - $k;               // Laba bersih
 
         $laporan = [
             'tahun' => (int)$tahunStr,
             'total_modal' => $m,
+            'total_hpp' => $hpp,
+            'total_omset' => $o,
             'total_pemasukan' => $p,
             'total_pengeluaran' => $k,
             'laba_bersih' => $laba,
-            'pajak' => 0.005 * max(0, $p - ($m + $k))
+            'pajak' => 0.12 * max(0, $laba)
         ];
 
         return response()->json([
@@ -106,17 +112,33 @@ class DashboardController extends Controller
             $tokoId = $toko->id;
 
             // Data total keseluruhan
-            $totalModal = Transaksi::where('fk_id_toko', $tokoId)->sum('total_modal');
+            $totalHpp = Transaksi::where('fk_id_toko', $tokoId)->sum('total_modal');
             $totalPemasukan = Transaksi::where('fk_id_toko', $tokoId)->sum('total_bayar');
             $totalPengeluaran = BiayaOperasional::where('fk_id_toko', $tokoId)->sum('jumlah_biaya');
-            $labaBersih = $totalPemasukan - ($totalModal + $totalPengeluaran);
+            $labaBersih = $totalPemasukan - ($totalHpp + $totalPengeluaran);
 
             // Data bulan ini
             $now = now();
-            $bulanIniModal = Transaksi::where('fk_id_toko', $tokoId)
+            $perhitunganBulanIniModal = Transaksi::where('fk_id_toko', $tokoId)
                 ->whereYear('created_at', $now->year)
                 ->whereMonth('created_at', $now->month)
                 ->sum('total_modal');
+
+            $bulanIniModal = TambahStock::join('products', 'tambah_stocks.fk_id_product', '=', 'products.id')
+                ->where('products.fk_id_toko', $tokoId)
+                ->whereYear('tambah_stocks.created_at', $now->year)
+                ->sum(DB::raw('jumlah * harga_beli'));
+
+            $bulanIniHpp = Transaksi::where('fk_id_toko', $tokoId)
+                ->whereYear('created_at', $now->year)
+                ->whereMonth('created_at', $now->month)
+                ->sum('total_modal');
+
+            $hariIniPemasukan = Transaksi::where('fk_id_toko', $tokoId)
+                ->whereYear('created_at', $now->year)
+                ->whereMonth('created_at', $now->month)
+                ->whereDay('created_at', $now->day)
+                ->sum('total_bayar');
 
             $bulanIniPemasukan = Transaksi::where('fk_id_toko', $tokoId)
                 ->whereYear('created_at', $now->year)
@@ -128,7 +150,7 @@ class DashboardController extends Controller
                 ->whereMonth('created_at', $now->month)
                 ->sum('jumlah_biaya');
 
-            $labaBersihBulanIni = $bulanIniPemasukan - ($bulanIniModal + $bulanIniPengeluaran);
+            $labaBersihBulanIni = $bulanIniPemasukan - ($perhitunganBulanIniModal + $bulanIniPengeluaran);
 
             // Data per tahun (time series laba bersih)
             $transaksiPerTahun = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as modal, SUM(total_bayar) as pemasukan')
@@ -185,9 +207,12 @@ class DashboardController extends Controller
             // Gabungkan ke laporan utama
             $laporan[] = [
                 'nama_toko' => $toko->nama_toko,
-                'total_modal' => $totalModal,
-                'total_pemasukan' => $totalPemasukan - $totalModal,
+                'total_modal' => $bulanIniModal,
+                'total_hpp' => $bulanIniHpp,
+                'total_pemasukan' => $totalPemasukan - $totalHpp,
                 'total_pengeluaran' => $totalPengeluaran,
+                'omset_hari_ini' => $hariIniPemasukan,
+                'omset_bulan_ini' => $bulanIniPemasukan,
                 'laba_bersih' => $labaBersih,
                 'laba_bersih_bulan_ini' => $labaBersihBulanIni,
                 'laba_bersih_per_tahun' => $labaPerTahun,

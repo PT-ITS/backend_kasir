@@ -104,11 +104,13 @@ class AuthController extends Controller
         $user->active_token = $tokenWithClaims;
         $user->save();
 
-        LogActivity::create([
-            'level' => $user->level,
-            'nama' => $user->name,
-            'keterangan' => 'Login',
-        ]);
+        if ($user->level == '1' || $user->level == '2') {
+            LogActivity::create([
+                'level' => $user->level,
+                'nama' => $user->name,
+                'keterangan' => 'Login',
+            ]);
+        }
         return $this->respondWithToken($tokenWithClaims);
     }
 
@@ -165,12 +167,14 @@ class AuthController extends Controller
      */
     public function logout()
     {
-        LogActivity::create([
-            'level' => auth()->user()->level,
-            'nama' => auth()->user()->name,
-            'keterangan' => 'Logout',
-        ]);
-        auth()->logout();
+        if (auth()->user()->level == '1' || auth()->user()->level === '2') {
+            LogActivity::create([
+                'level' => auth()->user()->level,
+                'nama' => auth()->user()->name,
+                'keterangan' => 'Logout',
+            ]);
+            auth()->logout();
+        }
 
         return response()->json(['message' => 'Successfully logged out']);
     }
