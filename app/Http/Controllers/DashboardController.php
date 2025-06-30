@@ -65,6 +65,11 @@ class DashboardController extends Controller
             ->groupBy('tahun')
             ->pluck('total_pemasukan', 'tahun');
 
+        $modal = Transaksi::selectRaw('YEAR(created_at) as tahun, SUM(total_modal) as total_modal')
+            ->whereYear('created_at', $tahunStr)
+            ->groupBy('tahun')
+            ->pluck('total_modal', 'tahun');
+
         // Query pengeluaran
         $pengeluaran = BiayaOperasional::selectRaw('YEAR(created_at) as tahun, SUM(jumlah_biaya) as total_pengeluaran')
             ->whereYear('created_at', $tahunStr)
@@ -73,9 +78,9 @@ class DashboardController extends Controller
 
         // Ambil data hanya tahun filter
         $m = $modal[$tahunStr] ?? 0;
-        $p = $pemasukan[$tahunStr] ?? 0;
+        $p = $pemasukan[$tahunStr] - $modal[$tahunStr] ?? 0;
         $k = $pengeluaran[$tahunStr] ?? 0;
-        $laba = $p - ($m + $k);
+        $laba = $p - $k;
 
         $laporan = [
             'tahun' => (int)$tahunStr,
@@ -181,7 +186,7 @@ class DashboardController extends Controller
             $laporan[] = [
                 'nama_toko' => $toko->nama_toko,
                 'total_modal' => $totalModal,
-                'total_pemasukan' => $totalPemasukan,
+                'total_pemasukan' => $totalPemasukan - $totalModal,
                 'total_pengeluaran' => $totalPengeluaran,
                 'laba_bersih' => $labaBersih,
                 'laba_bersih_bulan_ini' => $labaBersihBulanIni,

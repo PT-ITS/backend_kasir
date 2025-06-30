@@ -54,7 +54,7 @@ class LaporanKeuanganController extends Controller
                 return [
                     'tanggal' => $tanggal,
                     'keterangan' => 'Pendapatan Harian',
-                    'debit' => $items->sum('total_bayar'),
+                    'debit' => $items->sum('total_bayar') -  $items->sum('total_modal'),
                     'kredit' => 0,
                 ];
             })
