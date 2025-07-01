@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\TebusMurahController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\AbsensiController;
 
 Route::group([
   'prefix' => 'auth'
@@ -146,6 +147,7 @@ Route::group([
   Route::group([
     'middleware' => 'auth:api'
   ], function () {
+    Route::post('absen', [AbsensiController::class, 'absensi']);
     Route::get('list', [KasirController::class, 'list']);
     Route::get('list-by-toko/{id}', [KasirController::class, 'listByToko']);
     Route::get('detail/{id}', [KasirController::class, 'detail']);

@@ -16,7 +16,16 @@ class CreateAbsensisTable extends Migration
         Schema::create('absensis', function (Blueprint $table) {
             $table->id();
             $table->string('foto');
-            $table->foreignId('fk_id_jadwal')->constrained('jadwals')->onDelete('cascade')->onUpdate('cascade');
+            $table->enum('shift', [
+                '0',
+                '1',
+                '2'
+            ]);
+            $table->date('tanggal_absensi');
+            $table->enum('jenis_absensi', [
+                '0',
+                '1',
+            ]);
             $table->foreignId('fk_id_kasir')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
