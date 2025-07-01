@@ -16,4 +16,14 @@ class Absensi extends Model
         'jenis_absensi',
         'fk_id_kasir',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'fk_id_kasir');
+    }
+
+    public function kasir()
+    {
+        return $this->hasOne(Kasir::class, 'fk_id_user', 'fk_id_kasir');
+    }
 }

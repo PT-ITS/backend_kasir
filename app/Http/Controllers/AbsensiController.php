@@ -53,12 +53,15 @@ class AbsensiController extends Controller
     /**
      * Menampilkan semua data absensi
      */
-    public function index()
+    public function list()
     {
-        $data = Absensi::orderBy('created_at', 'desc')->get();
+        $data = Absensi::with(['user', 'kasir'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json([
             'status' => true,
+            'message' => 'Success',
             'data' => $data
         ]);
     }

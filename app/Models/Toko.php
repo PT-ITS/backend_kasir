@@ -17,8 +17,13 @@ class Toko extends Model
         'fk_id_manager',
     ];
 
-    public function manager()
+    public function user()
     {
         return $this->belongsTo(User::class, 'fk_id_manager');
+    }
+
+    public function manager()
+    {
+        return $this->hasOne(Manager::class, 'fk_id_user', 'fk_id_manager');
     }
 }

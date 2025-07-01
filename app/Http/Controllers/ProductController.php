@@ -58,22 +58,15 @@ class ProductController extends Controller
         // Ambil semua ID produk untuk pengecekan expired
         $productIds = $products->pluck('id');
 
-        // Ambil semua tambah_stocks yang relevan
-        $tambahStocks = TambahStock::whereIn('fk_id_product', $productIds)
-            ->orderBy('expired', 'asc')
-            ->get()
-            ->groupBy('fk_id_product');
+        // Ambil expired terakhir dari setiap produk
+        $latestExpired = TambahStock::whereIn('fk_id_product', $productIds)
+            ->selectRaw('fk_id_product, MAX(expired) as expired_terbaru')
+            ->groupBy('fk_id_product')
+            ->get();
 
-        $jumlahProdukExpired = 0;
-
-        foreach ($tambahStocks as $productId => $stocks) {
-            // Ambil expired terdekat dari hari ini (boleh lewat hari ini sedikit atau belum lewat)
-            $expiredTerdekat = $stocks->first();
-
-            if ($expiredTerdekat && Carbon::parse($expiredTerdekat->expired)->lt($today)) {
-                $jumlahProdukExpired++;
-            }
-        }
+        $jumlahProdukExpired = $latestExpired->filter(function ($item) use ($today) {
+            return Carbon::parse($item->expired_terbaru)->lt($today);
+        })->count();
 
         return response()->json([
             'id' => $id,
@@ -83,6 +76,55 @@ class ProductController extends Controller
             'jumlah_produk_expired' => $jumlahProdukExpired,
             'data' => $products
         ]);
+    }
+
+    public function produkExpired($idToko)
+    {
+        try {
+            $today = Carbon::today();
+
+            // Ambil semua produk dari toko
+            $productIds = Product::where('fk_id_toko', $idToko)->pluck('id');
+            $toko = Toko::find($idToko);
+
+            // Ambil expired terbaru dan total stok dari setiap produk (dari tambah_stocks)
+            $tambahStocks = TambahStock::whereIn('fk_id_product', $productIds)
+                ->selectRaw('fk_id_product, MAX(expired) as expired_terbaru, SUM(jumlah) as total_stok')
+                ->groupBy('fk_id_product')
+                ->get();
+
+            // Filter hanya yang expired (expired terbaru < hari ini)
+            $expiredStocks = $tambahStocks->filter(function ($item) use ($today) {
+                return Carbon::parse($item->expired_terbaru)->lt($today);
+            })->sortBy('expired_terbaru');
+
+            // Ambil data produk lengkap
+            $products = Product::whereIn('id', $expiredStocks->pluck('fk_id_product'))->get()->keyBy('id');
+
+            // Gabungkan data produk + expired + stok dari tambah_stock
+            $data = $expiredStocks->map(function ($item) use ($products) {
+                $product = $products[$item->fk_id_product];
+                return [
+                    'id' => $product->id,
+                    'nama_product' => $product->nama_product,
+                    'stok' => $item->total_stok,
+                    'expired_terbaru' => $item->expired_terbaru,
+                ];
+            })->values();
+
+            return response()->json([
+                'id' => '1',
+                'nama_toko' => $toko->nama_toko,
+                'total' => $data->count(),
+                'data' => $data,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'message' => $th->getMessage(),
+                'data' => []
+            ]);
+        }
     }
 
     public function listProductByBarcode($barcode)

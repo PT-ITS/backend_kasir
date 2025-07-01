@@ -48,6 +48,7 @@ Route::group([
   ], function () {
     Route::get('/list', [ProductController::class, 'listProductByToko']);
     Route::get('/list/{id}', [ProductController::class, 'listProductByIdToko']);
+    Route::get('/expired-product/{id}', [ProductController::class, 'produkExpired']);
     Route::get('/list-by-barcode/{barcode}', [ProductController::class, 'listProductByBarcode']);
     Route::get('/list-by-name', [ProductController::class, 'listProductByNama']);
     Route::get('/detail/{id}', [ProductController::class, 'detailProduct']);
@@ -149,13 +150,23 @@ Route::group([
   Route::group([
     'middleware' => 'auth:api'
   ], function () {
-    Route::post('absen', [AbsensiController::class, 'absensi']);
     Route::get('list', [KasirController::class, 'list']);
     Route::get('list-by-toko/{id}', [KasirController::class, 'listByToko']);
     Route::get('detail/{id}', [KasirController::class, 'detail']);
     Route::post('create', [KasirController::class, 'create']);
     Route::post('update/{id}', [KasirController::class, 'update']);
     Route::delete('delete/{id}', [KasirController::class, 'delete']);
+  });
+});
+
+Route::group([
+  'prefix' => 'absensi'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::post('absen', [AbsensiController::class, 'absensi']);
+    Route::get('list', [AbsensiController::class, 'list']);
   });
 });
 
@@ -176,12 +187,12 @@ Route::group([
 Route::group([
   'prefix' => 'transaksi'
 ], function () {
-  // Route::group([
-  //     'middleware' => 'auth:api'
-  // ], function () {
-  Route::get('/list', [TransaksiController::class, 'listTransaksiByToko']);
-  Route::get('/detail/{id}', [TransaksiController::class, 'detailTransaksi']);
-  Route::post('/create', [TransaksiController::class, 'createTransaksi']);
-  Route::delete('/delete/{id}', [TransaksiController::class, 'deleteTransaksi']);
-  // });
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('/list', [TransaksiController::class, 'listTransaksiByToko']);
+    Route::get('/detail/{id}', [TransaksiController::class, 'detailTransaksi']);
+    Route::post('/create', [TransaksiController::class, 'createTransaksi']);
+    Route::delete('/delete/{id}', [TransaksiController::class, 'deleteTransaksi']);
+  });
 });
