@@ -11,7 +11,9 @@ class Absensi extends Model
 
     protected $fillable = [
         'foto',
-        'fk_id_jadwal',
+        'shift',
+        'tanggal_absensi',
+        'jenis_absensi',
         'fk_id_kasir',
     ];
 }

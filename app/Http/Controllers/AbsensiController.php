@@ -12,13 +12,15 @@ class AbsensiController extends Controller
     /**
      * Menyimpan data absensi beserta foto.
      */
-    public function store(Request $request)
+    public function absensi(Request $request)
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
             'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'fk_id_jadwal' => 'required|integer',
-            'fk_id_kasir' => 'required|integer',
+            'shift' => 'required|string',
+            'tanggal_absensi' => 'required|date',
+            'jenis_absensi' => 'required|string',
+            'fk_id_kasir' => 'required|integer'
         ]);
 
         if ($validator->fails()) {
@@ -35,7 +37,9 @@ class AbsensiController extends Controller
         // Simpan ke database
         $absensi = Absensi::create([
             'foto' => $path,
-            'fk_id_jadwal' => $request->fk_id_jadwal,
+            'shift' => $request->shift,
+            'tanggal_absensi' => $request->tanggal_absensi,
+            'jenis_absensi' => $request->jenis_absensi,
             'fk_id_kasir' => $request->fk_id_kasir,
         ]);
 
