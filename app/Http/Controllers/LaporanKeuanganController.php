@@ -39,7 +39,8 @@ class LaporanKeuanganController extends Controller
 
         // 1. Data Operasional
         $operasional = BiayaOperasional::where('fk_id_toko', $tokoId)
-            ->whereBetween('tanggal_bayar', [$startDate, $endDate])
+            ->whereDate('tanggal_bayar', '>=', $startDate)
+            ->whereDate('tanggal_bayar', '<=', $endDate)
             ->get()
             ->map(function ($item) {
                 return [
@@ -54,7 +55,8 @@ class LaporanKeuanganController extends Controller
 
         // 2. Data Transaksi: Kelompokkan berdasarkan tanggal
         $transaksi = Transaksi::where('fk_id_toko', $tokoId)
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate)
             ->get()
             ->groupBy(function ($item) {
                 return Carbon::parse($item->created_at)->toDateString();
@@ -74,7 +76,8 @@ class LaporanKeuanganController extends Controller
 
         // 3. Data Belanja Barang
         $belanja = CatatanStock::where('fk_id_toko', $tokoId)
-            ->whereBetween('tanggal_belanja', [$startDate, $endDate])
+            ->whereDate('tanggal_belanja', '>=', $startDate)
+            ->whereDate('tanggal_belanja', '<=', $endDate)
             ->get()
             ->map(function ($item) {
                 return [
