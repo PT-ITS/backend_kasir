@@ -65,7 +65,7 @@ class ProductController extends Controller
             ->get();
 
         $jumlahProdukExpired = $latestExpired->filter(function ($item) use ($today) {
-            return Carbon::parse($item->expired_terbaru)->lt($today);
+            return Carbon::parse($item->expired_terbaru)->between($today, $today->copy()->addMonth());
         })->count();
 
         return response()->json([
@@ -82,6 +82,7 @@ class ProductController extends Controller
     {
         try {
             $today = Carbon::today();
+            $oneMonthLater = $today->copy()->addMonth();
 
             // Ambil semua produk dari toko
             $productIds = Product::where('fk_id_toko', $idToko)->pluck('id');
@@ -93,16 +94,17 @@ class ProductController extends Controller
                 ->groupBy('fk_id_product')
                 ->get();
 
-            // Filter hanya yang expired (expired terbaru < hari ini)
-            $expiredStocks = $tambahStocks->filter(function ($item) use ($today) {
-                return Carbon::parse($item->expired_terbaru)->lt($today);
+            // Filter produk yang expired dalam waktu 1 bulan ke depan (termasuk hari ini)
+            $expiredSoonStocks = $tambahStocks->filter(function ($item) use ($today, $oneMonthLater) {
+                $expired = Carbon::parse($item->expired_terbaru);
+                return $expired->between($today, $oneMonthLater);
             })->sortBy('expired_terbaru');
 
             // Ambil data produk lengkap
-            $products = Product::whereIn('id', $expiredStocks->pluck('fk_id_product'))->get()->keyBy('id');
+            $products = Product::whereIn('id', $expiredSoonStocks->pluck('fk_id_product'))->get()->keyBy('id');
 
             // Gabungkan data produk + expired + stok dari tambah_stock
-            $data = $expiredStocks->map(function ($item) use ($products) {
+            $data = $expiredSoonStocks->map(function ($item) use ($products) {
                 $product = $products[$item->fk_id_product];
                 return [
                     'id' => $product->id,
@@ -202,6 +204,7 @@ class ProductController extends Controller
                     'deskripsi' => 'Manager menambahkan product baru',
                 ]);
             }
+
             $validateData = $request->validate([
                 'kode_product' => 'required',
                 'nama_product' => 'required',
@@ -214,6 +217,18 @@ class ProductController extends Controller
                 'merek' => 'required',
                 'fk_id_toko' => 'required|exists:tokos,id'
             ]);
+
+            // Cek apakah barcode sudah ada di toko yang sama
+            $barcodeExists = Product::where('barcode', $validateData['barcode'])
+                ->where('fk_id_toko', $validateData['fk_id_toko'])
+                ->exists();
+
+            if ($barcodeExists) {
+                return response()->json([
+                    'id' => '0',
+                    'data' => 'Barcode sudah digunakan di toko ini.'
+                ], 422);
+            }
 
             $products = Product::create([
                 'kode_product' => $validateData['kode_product'],
@@ -230,7 +245,7 @@ class ProductController extends Controller
 
             return response()->json([
                 'id' => '1',
-                'data' => 'product berhasil di tambahkan'
+                'data' => 'Product berhasil ditambahkan'
             ]);
         } catch (\Throwable $th) {
             return response()->json([
@@ -275,16 +290,14 @@ class ProductController extends Controller
             'sk_grosir' => 'required',
         ]);
 
+        // $levelUser = User::find(auth()->user()->id)->level ?? '';
 
-
-        $levelUser = User::find(auth()->user()->id)->level ?? '';
-
-        if ($levelUser != '1') {
-            return response()->json([
-                'id' => '0',
-                'data' => 'anda tidak memiliki akses untuk aksi ini'
-            ]);
-        }
+        // if ($levelUser != '1') {
+        //     return response()->json([
+        //         'id' => '0',
+        //         'data' => 'anda tidak memiliki akses untuk aksi ini'
+        //     ]);
+        // }
 
         $products = Product::find($validateData['id_product']);
 
@@ -325,15 +338,14 @@ class ProductController extends Controller
                 'id_product' => 'required'
             ]);
 
-            $levelUser = User::find(auth()->user()->id)->level ?? '';
+            // $levelUser = User::find(auth()->user()->id)->level ?? '';
 
-            if ($levelUser != '1') {
-                return response()->json([
-                    'id' => '0',
-                    'data' => 'anda tidak memiliki akses untuk aksi ini'
-                ]);
-            }
-
+            // if ($levelUser != '1') {
+            //     return response()->json([
+            //         'id' => '0',
+            //         'data' => 'anda tidak memiliki akses untuk aksi ini'
+            //     ]);
+            // }
 
             Product::find($validateData['id_product'])->delete();
 
