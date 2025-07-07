@@ -14,6 +14,7 @@ class TebusMurah extends Model
         'minimal_belanja',
         'start',
         'end',
+        'stock',
         'fk_id_product'
     ];
 

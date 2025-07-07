@@ -11,9 +11,9 @@ class ControllerPromo extends Controller
 {
     public function listPromoByToko($id)
     {
-        $promos = Promo::with('productPromos')
-                    ->where('fk_id_toko', $id)
-                    ->get();
+        $promos = Promo::with(['productPromos.product'])
+            ->where('fk_id_toko', $id)
+            ->get();
 
         return response()->json([
             'id' => '1',
@@ -139,4 +139,3 @@ class ControllerPromo extends Controller
         }
     }
 }
-

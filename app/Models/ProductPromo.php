@@ -20,4 +20,9 @@ class ProductPromo extends Model
     {
         return $this->belongsTo(Promo::class, 'fk_id_promo');
     }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'fk_id_product');
+    }
 }

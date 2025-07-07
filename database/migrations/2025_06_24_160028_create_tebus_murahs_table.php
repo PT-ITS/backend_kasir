@@ -19,6 +19,7 @@ class CreateTebusMurahsTable extends Migration
             $table->string('minimal_belanja');
             $table->date('start');
             $table->date('end');
+            $table->integer('stock');
             $table->foreignId('fk_id_product')->constrained('products')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

@@ -15,6 +15,7 @@ use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\TebusMurahController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\ControllerPromo;
 
 Route::group([
   'prefix' => 'auth'
@@ -108,6 +109,19 @@ Route::group([
     Route::post('/create', [TebusMurahController::class, 'createTebusMurah']);
     Route::post('/update/{id}', [TebusMurahController::class, 'updateTebusMurah']);
     Route::delete('/delete/{id}', [TebusMurahController::class, 'deleteTebusMurah']);
+  });
+});
+
+Route::group([
+  'prefix' => 'promo'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('/list-by-toko/{id}', [ControllerPromo::class, 'listPromoByToko']);
+    Route::post('/create/{id}', [ControllerPromo::class, 'createPromoByToko']);
+    Route::post('/update/{id}', [ControllerPromo::class, 'updatePromo']);
+    Route::delete('/delete/{id}', [ControllerPromo::class, 'deletePromo']);
   });
 });
 

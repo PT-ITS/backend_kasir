@@ -77,6 +77,7 @@ class TebusMurahController extends Controller
             'minimal_belanja' => 'required|string',
             'start' => 'required|date',
             'end' => 'required|date|after_or_equal:start',
+            'stock' => 'required|integer',
             'fk_id_product' => 'required|exists:products,id',
         ]);
 
@@ -94,6 +95,7 @@ class TebusMurahController extends Controller
                 'minimal_belanja' => $request->minimal_belanja,
                 'start' => $request->start,
                 'end' => $request->end,
+                'stock' => $request->stock,
                 'fk_id_product' => $request->fk_id_product
             ]);
 
@@ -125,6 +127,7 @@ class TebusMurahController extends Controller
             'minimal_belanja' => 'required|string',
             'start' => 'required|date',
             'end' => 'required|date|after_or_equal:start',
+            'stock' => 'required|integer',
             'fk_id_product' => 'required|exists:products,id',
         ]);
 
@@ -151,6 +154,7 @@ class TebusMurahController extends Controller
                 'minimal_belanja' => $request->minimal_belanja,
                 'start' => $request->start,
                 'end' => $request->end,
+                'stock' => $request->stock,
                 'fk_id_product' => $request->fk_id_product
             ]);
 
